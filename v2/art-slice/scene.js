@@ -7,7 +7,8 @@ const controls=new T.OrbitControls(camera,renderer.domElement);controls.enableDa
 scene.add(new T.HemisphereLight(0xfff1d9,0x63866b,2.1));
 const sun=new T.DirectionalLight(0xffe5b9,3.1);sun.position.set(-13,24,11);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);Object.assign(sun.shadow.camera,{left:-28,right:28,top:28,bottom:-28,near:.5,far:85});sun.shadow.normalBias=.035;sun.shadow.bias=-.0002;scene.add(sun);
 const fill=new T.DirectionalLight(0xb7d9ff,.6);fill.position.set(8,8,-10);scene.add(fill);
-const loader=new T.GLTFLoader();const names=["tree-a","tree-b","pine","bush","flowers","fern","rock","grass","wall","door","window","roof","chimney","fence","explorer"];
+const {MeshoptDecoder}=await import("./meshopt_decoder.module.js");await MeshoptDecoder.ready;
+const loader=new T.GLTFLoader();loader.setMeshoptDecoder(MeshoptDecoder);const names=["tree-a","tree-b","pine","bush","flowers","fern","rock","grass","wall","door","window","roof","chimney","fence","explorer"];
 let loaded=0;const entries=await Promise.all(names.map(async name=>{const g=await loader.loadAsync("models/"+name+".glb");g.scene.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true}});status.textContent="Đang tải model "+(++loaded)+"/"+names.length;return [name,g]}));const assets=Object.fromEntries(entries);
 let seed=9281;const rand=()=>((seed=(1664525*seed+1013904223)>>>0)/4294967296);
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));const smooth=(a,b,x)=>{const t=clamp((x-a)/(b-a),0,1);return t*t*(3-2*t)};
