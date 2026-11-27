@@ -5,8 +5,10 @@ let renderer;try{if(!T||!C)throw Error("Missing engine");renderer=new T.WebGLRen
 const storage={getItem:k=>localStorage.getItem(k),setItem:(k,v)=>localStorage.setItem(k,v),removeItem:k=>localStorage.removeItem(k)};
 let state=C.load(storage);
 const world=$("world"), canvas=renderer.domElement;
-world.append(canvas); renderer.setPixelRatio(Math.min(devicePixelRatio||1,1.6));renderer.outputColorSpace=T.SRGBColorSpace;renderer.toneMapping=T.ACESFilmicToneMapping;renderer.toneMappingExposure=1.15;
-renderer.shadowMap.enabled=true;renderer.shadowMap.type=T.PCFShadowMap;
+const qa=new URLSearchParams(location.search).has("qa"), lowQuality=matchMedia("(pointer: coarse)").matches||new URLSearchParams(location.search).get("quality")==="low";
+const report=(key,value)=>{if(qa)world.dataset[key]=String(value)};
+world.append(canvas); renderer.setPixelRatio(Math.min(devicePixelRatio||1,lowQuality?1:1.6));renderer.outputColorSpace=T.SRGBColorSpace;renderer.toneMapping=T.ACESFilmicToneMapping;renderer.toneMappingExposure=1.15;
+renderer.shadowMap.enabled=!lowQuality;renderer.shadowMap.type=T.PCFShadowMap;
 const scene=new T.Scene();scene.background=new T.Color(0xbfe4f4);scene.fog=new T.Fog(0xbfe4f4,55,105);
 const camera=new T.PerspectiveCamera(54,1,.1,160);
 scene.add(new T.HemisphereLight(0xe1f3ff,0x8c7454,2));
@@ -36,16 +38,17 @@ function playerModel(){const p=new T.Group();const body=box(p,.65,.75,.43,M.purp
 const avatar=playerModel(),player=avatar.p;scene.add(player);player.position.set(0,0,10);
 const phoenix=new T.Group();scene.add(phoenix);sphere(phoenix,.48,M.cream,0,.48,0);const hood=sphere(phoenix,.49,M.cream,0,.68,.04);hood.scale.set(1,1.12,.94);for(const x of [-.27,.27]){let ear=mesh(phoenix,new T.ConeGeometry(.14,.34,9),M.cream,x,1.07,0);ear.rotation.z=-x}for(const x of [-.15,.15])sphere(phoenix,.049,M.dark,x,.73,-.43,8);sphere(phoenix,.18,M.light,0,.35,-.43);phoenix.position.set(1.4,1,8.5);modelTargets.push(["phoenix-companion",phoenix]);
 for(const [x,z,s] of [[-11,12,.85],[12,13,.9],[-9,-9,.9],[11,-14,.7]]){const g=new T.Group();g.position.set(x,0,z);g.scale.setScalar(s);land.add(g);sphere(g,.45,M.stone,0,.3,0,7);block(x,z,.7*s);modelTargets.push(["rock-moss",g])}
-if(window.PhoenixAssets&&T.GLTFLoader){const assets=window.PhoenixAssets.create(T);Promise.all(modelTargets.map(([name,g])=>assets.mount(name,g))).then(results=>console.info("Phoenix assets loaded",results.filter(Boolean).length+"/"+results.length));}
+if(window.PhoenixAssets&&T.GLTFLoader){const assets=window.PhoenixAssets.create(T);Promise.all(modelTargets.map(([name,g])=>assets.mount(name,g))).then(results=>{const count=results.filter(Boolean).length;report("assets",count+"/"+results.length);console.info("Phoenix assets loaded",count+"/"+results.length)});}else report("assets","fallback");
 let guide=false,yaw=0,pitch=.43,vy=0,grounded=true,step=0,lit=false,quizIndex=0,waiting=false,modal=false,saveFailed=false;const keys=new Set();
 function refresh(){const done=C.stars(state);$("stars").textContent=done;$("objective").textContent=done?t("done"):t("objective");$("hint").textContent=done?t("hintDone"):guide?t("hintGuide"):t("hint");if(saveFailed)$("hint").textContent+=" · "+t("saveError");$("guide").textContent=guide?t("stopGuide"):t("guide")}
 function persist(){saveFailed=!C.save(storage,state);refresh()}
 function isModal(){return $("welcome").open||$("lesson").open}
 function clearInput(){keys.clear();drag=null}
 function showWelcome(){$("name").value=state.name;clearInput();$("welcome").showModal()}
+for(const id of ["welcome","lesson"]){$(id).addEventListener("close",()=>{clearInput();canvas.focus({preventScroll:true})})}canvas.tabIndex=0;
 $("nameform").addEventListener("submit",e=>{e.preventDefault();state.name=$("name").value.trim().slice(0,24)||t("defaultName");persist();$("welcome").close()});
 $("profile").onclick=showWelcome;$("reset").onclick=()=>{if(confirm(t("resetConfirm"))){C.reset(storage);state=C.fresh();persist();player.position.set(0,0,10);vy=0;grounded=true;guide=false;refresh();showWelcome()}};
-$("guide").onclick=e=>{guide=!guide;refresh();if(e.detail>0)$("guide").blur()};
+$("guide").onclick=e=>{guide=!guide;refresh();if(e.detail>0)canvas.focus({preventScroll:true})};
 function jump(){if(!isModal()&&grounded){vy=5.6;grounded=false}}
 $("jump").onclick=jump;
 const distance=()=>Math.hypot(player.position.x-station.x,player.position.z-station.z);
@@ -61,17 +64,20 @@ addEventListener("keyup",e=>keys.delete(e.key.length===1?e.key.toLowerCase():e.k
 let drag=null;canvas.addEventListener("pointerdown",e=>{drag={id:e.pointerId,x:e.clientX,y:e.clientY};canvas.setPointerCapture(e.pointerId)});canvas.addEventListener("pointermove",e=>{if(!drag||drag.id!==e.pointerId)return;yaw-=(e.clientX-drag.x)*.006;pitch=Math.max(.18,Math.min(.85,pitch+(e.clientY-drag.y)*.004));drag.x=e.clientX;drag.y=e.clientY});for(const event of ["pointerup","pointercancel","lostpointercapture"])canvas.addEventListener(event,e=>{if(drag?.id===e.pointerId)drag=null});
 document.querySelectorAll("[data-key]").forEach(b=>{const k=b.dataset.key;b.addEventListener("pointerdown",e=>{e.preventDefault();b.setPointerCapture(e.pointerId);if(!isModal())keys.add(k)});for(const ev of ["pointerup","pointercancel","lostpointercapture"])b.addEventListener(ev,()=>keys.delete(k))});
 function allowed(x,z){return Math.hypot(x,z)<20.9&&!obstacles.some(o=>Math.hypot(x-o.x,z-o.z)<o.r+.3)}
+function guideTarget(x,z){const dx=station.x-x,dz=station.z-z,d=Math.hypot(dx,dz);if(d<2.2)return [station.x+1.4,station.z+1];const len=Math.min(3,d);const angles=[0,.45,-.45,.9,-.9,1.5,-1.5,2.2,-2.2];const theta=Math.atan2(dz,dx);for(const angle of angles){const a=theta+angle,tx=x+Math.cos(a)*len,tz=z+Math.sin(a)*len;if(allowed(tx,tz)&&[.25,.5,.75].every(f=>allowed(x+(tx-x)*f,z+(tz-z)*f)))return [tx,tz]}return [x,z]}
 const camOffset=new T.Vector3(),look=new T.Vector3(),target=new T.Vector3();function resize(){const w=world.clientWidth,h=world.clientHeight;if(!w||!h)return;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix()}addEventListener("resize",resize);resize();
 let last=performance.now(),time=0,nearPrev=null;function tick(now){const dt=Math.min(.045,(now-last)/1000);last=now;time+=dt;requestAnimationFrame(tick);
 let ix=0,iz=0;if(!isModal()){ix=(keys.has("d")||keys.has("ArrowRight")?1:0)-(keys.has("a")||keys.has("ArrowLeft")?1:0);iz=(keys.has("s")||keys.has("ArrowDown")?1:0)-(keys.has("w")||keys.has("ArrowUp")?1:0)}
 const moving=ix!==0||iz!==0;if(moving){const n=Math.hypot(ix,iz);ix/=n;iz/=n;const dx=(ix*Math.cos(yaw)+iz*Math.sin(yaw))*dt*5,dz=(-ix*Math.sin(yaw)+iz*Math.cos(yaw))*dt*5;if(allowed(player.position.x+dx,player.position.z))player.position.x+=dx;if(allowed(player.position.x,player.position.z+dz))player.position.z+=dz;player.rotation.y=Math.atan2(-dx,-dz);step+=dt*12}
 if(!grounded&&!isModal()){vy-=dt*14;player.position.y+=vy*dt;if(player.position.y<=0){player.position.y=0;vy=0;grounded=true}}
 const swing=moving&&grounded?Math.sin(step)*.55:0;avatar.legs[0].rotation.x=swing;avatar.legs[1].rotation.x=-swing;avatar.arms[0].rotation.x=-swing*.8;avatar.arms[1].rotation.x=swing*.8;
-if(guide){const dx=station.x-player.position.x,dz=station.z-player.position.z,d=Math.hypot(dx,dz);if(d>2.2){let lead=Math.min(3,d);target.set(player.position.x+dx/d*lead,1.3+Math.sin(time*4)*.12,player.position.z+dz/d*lead);if(!allowed(target.x,target.z)){target.set(0,1.4,player.position.z)}}else target.set(station.x+1.4,1.3,station.z+1)}else target.set(player.position.x+1.35,player.position.y+1.15+Math.sin(time*4)*.12,player.position.z-1.3);
+if(guide){const [x,z]=guideTarget(player.position.x,player.position.z);target.set(x,1.3+Math.sin(time*4)*.12,z)}else target.set(player.position.x+1.35,player.position.y+1.15+Math.sin(time*4)*.12,player.position.z-1.3);
 if(!isModal())phoenix.position.lerp(target,1-Math.exp(-dt*3.7));phoenix.lookAt(player.position.x,phoenix.position.y,player.position.z);phoenix.rotateY(Math.PI);
 crystal.rotation.y+=dt*.65;crystal.position.y=1.5+Math.sin(time*2)*.13;marker.position.y=3.3+Math.sin(time*3)*.19;diamond.rotation.y+=dt;
 const near=distance()<=3;if(near!==nearPrev){nearPrev=near;$("near").textContent=near?t("near"):t("controls")}
-const range=8.6;camOffset.set(Math.sin(yaw)*Math.cos(pitch)*range,Math.sin(pitch)*range,Math.cos(yaw)*Math.cos(pitch)*range);look.copy(player.position).add(new T.Vector3(0,1.15,0));camera.position.copy(look).add(camOffset);camera.lookAt(look);renderer.render(scene,camera)}
-document.addEventListener("phoenix:locale",()=>{refresh();nearPrev=null;});
+const range=8.6;camOffset.set(Math.sin(yaw)*Math.cos(pitch)*range,Math.sin(pitch)*range,Math.cos(yaw)*Math.cos(pitch)*range);look.copy(player.position).add(new T.Vector3(0,1.15,0));// Conservative camera shortening near solid obstacles (not a full physics raycast).
+let cameraFactor=1;for(let f=.18;f<=1;f+=.08){const cx=look.x+camOffset.x*f,cz=look.z+camOffset.z*f,cy=look.y+camOffset.y*f;if(cy<4.8&&obstacles.some(o=>Math.hypot(cx-o.x,cz-o.z)<o.r+.15)){cameraFactor=Math.max(.2,f-.1);break}}
+camera.position.copy(look).addScaledVector(camOffset,cameraFactor);camera.lookAt(look);renderer.render(scene,camera);if(qa){report("ready","true");report("x",player.position.x.toFixed(2));report("y",player.position.y.toFixed(2));report("z",player.position.z.toFixed(2));report("yaw",yaw.toFixed(2));report("near",near);report("guide",guide)}}
+document.addEventListener("phoenix:locale",()=>{refresh();nearPrev=null;if(!isModal())canvas.focus({preventScroll:true})});
 refresh();if(!state.name)showWelcome();requestAnimationFrame(tick);
 })();
