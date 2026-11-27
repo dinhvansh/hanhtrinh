@@ -5,7 +5,7 @@ let renderer;try{if(!T||!C)throw Error("Missing engine");renderer=new T.WebGLRen
 const storage={getItem:k=>localStorage.getItem(k),setItem:(k,v)=>localStorage.setItem(k,v),removeItem:k=>localStorage.removeItem(k)};
 let state=C.load(storage);
 const world=$("world"), canvas=renderer.domElement;
-const qa=new URLSearchParams(location.search).has("qa"), lowQuality=matchMedia("(pointer: coarse)").matches||new URLSearchParams(location.search).get("quality")==="low";
+const qa=new URLSearchParams(location.search).has("qa"), touchDevice=matchMedia("(pointer: coarse)").matches, lowQuality=touchDevice||new URLSearchParams(location.search).get("quality")==="low";
 const report=(key,value)=>{if(qa)world.dataset[key]=String(value)};
 world.append(canvas); renderer.setPixelRatio(Math.min(devicePixelRatio||1,lowQuality?1:1.6));renderer.outputColorSpace=T.SRGBColorSpace;renderer.toneMapping=T.ACESFilmicToneMapping;renderer.toneMappingExposure=1.15;
 renderer.shadowMap.enabled=!lowQuality;renderer.shadowMap.type=T.PCFShadowMap;
@@ -104,8 +104,8 @@ clouds.forEach(({g,x},i)=>g.position.x=x+Math.sin(time*.09+i)*1.8);
 if(guide){const [x,z]=guideTarget(player.position.x,player.position.z);target.set(x,1.3+Math.sin(time*4)*.12,z)}else target.set(player.position.x+1.35,player.position.y+1.15+Math.sin(time*4)*.12,player.position.z-1.3);
 if(!isModal())phoenix.position.lerp(target,1-Math.exp(-dt*3.7));phoenix.lookAt(player.position.x,phoenix.position.y,player.position.z);phoenix.rotateY(Math.PI);
 crystal.rotation.y+=dt*.65;crystal.position.y=1.5+Math.sin(time*2)*.13;marker.position.y=3.3+Math.sin(time*3)*.19;diamond.rotation.y+=dt;
-const near=distance()<=3;if(near!==nearPrev){nearPrev=near;$("near").textContent=near?t("near"):t("controls")}
-const range=8.6;camOffset.set(Math.sin(yaw)*Math.cos(pitch)*range,Math.sin(pitch)*range,Math.cos(yaw)*Math.cos(pitch)*range);look.copy(player.position).add(new T.Vector3(0,1.15,0));// Conservative camera shortening near solid obstacles (not a full physics raycast).
+const near=distance()<=3;if(near!==nearPrev){nearPrev=near;$("near").textContent=near?t("near"):t(touchDevice?"touchControls":"controls")}
+const range=touchDevice?10.5:8.6;camOffset.set(Math.sin(yaw)*Math.cos(pitch)*range,Math.sin(pitch)*range,Math.cos(yaw)*Math.cos(pitch)*range);look.copy(player.position).add(new T.Vector3(0,1.15,0));// Conservative camera shortening near solid obstacles (not a full physics raycast).
 let cameraFactor=1;for(let f=.18;f<=1;f+=.08){const cx=look.x+camOffset.x*f,cz=look.z+camOffset.z*f,cy=look.y+camOffset.y*f;if(cy<4.8&&obstacles.some(o=>Math.hypot(cx-o.x,cz-o.z)<o.r+.15)){cameraFactor=Math.max(.2,f-.1);break}}
 camera.position.copy(look).addScaledVector(camOffset,cameraFactor);camera.lookAt(look);renderer.render(scene,camera);if(qa){report("ready","true");report("x",player.position.x.toFixed(2));report("y",player.position.y.toFixed(2));report("z",player.position.z.toFixed(2));report("yaw",yaw.toFixed(2));report("near",near);report("guide",guide)}}
 document.addEventListener("phoenix:locale",()=>{refresh();nearPrev=null;if(!isModal())canvas.focus({preventScroll:true})});
