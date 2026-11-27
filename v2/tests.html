@@ -1,0 +1,4 @@
+<!doctype html><html lang="vi"><meta charset="utf-8"><title>Core tests</title><h1>Core smoke tests</h1><pre id="out"></pre><script src="core.js"></script><script>
+const c=PhoenixCore,m=new Map(),s={getItem:k=>m.get(k),setItem:(k,v)=>m.set(k,v),removeItem:k=>m.delete(k)},a=c.load(s),tests=[];function check(name,ok){tests.push((ok?"PASS ":"FAIL ")+name)}
+check("new state",c.stars(a)===0);check("reward once",c.complete(a)===true&&c.complete(a)===false&&c.stars(a)===1);a.name="Phoenix";check("save/load",c.save(s,a)&&c.load(s).name==="Phoenix"&&c.stars(c.load(s))===1);s.setItem(c.KEY,"{");check("corrupt data",c.stars(c.load(s))===0);s.setItem(c.KEY,JSON.stringify({version:1,completed:{fake:true}}));check("unknown quest ignored",c.stars(c.load(s))===0);check("reset",c.reset(s)&&!m.has(c.KEY));document.getElementById("out").textContent=tests.join("\n");if(tests.some(t=>t.startsWith("FAIL")))throw Error("Core test failed");
+</script></html>
