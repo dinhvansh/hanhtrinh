@@ -32,6 +32,5 @@ jobs:
         with:
           name: phoenix-art-preview
           path: |
-            v2/art-slice/
-            v2/vendor/three.bundle.js
-            v2/assets/models/phoenix-companion.gltf
+            v2/
+            index.html

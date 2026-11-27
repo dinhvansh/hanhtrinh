@@ -10,6 +10,7 @@ const report=(key,value)=>{if(qa)world.dataset[key]=String(value)};
 world.append(canvas); renderer.setPixelRatio(Math.min(devicePixelRatio||1,lowQuality?1:1.6));renderer.outputColorSpace=T.SRGBColorSpace;renderer.toneMapping=T.ACESFilmicToneMapping;renderer.toneMappingExposure=1.15;
 renderer.shadowMap.enabled=!lowQuality;renderer.shadowMap.type=T.PCFShadowMap;
 const scene=new T.Scene();scene.background=new T.Color(0xbfe4f4);scene.fog=new T.Fog(0xbfe4f4,55,105);
+addPhoenixHorizon(T,scene);
 const camera=new T.PerspectiveCamera(54,1,.1,160);
 scene.add(new T.HemisphereLight(0xe1f3ff,0x8c7454,2));
 const sun=new T.DirectionalLight(0xfff0d1,2.7);sun.position.set(-15,25,12);sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);Object.assign(sun.shadow.camera,{left:-25,right:25,top:25,bottom:-25,near:1,far:70});sun.shadow.normalBias=.035;scene.add(sun);
@@ -40,8 +41,9 @@ const tuftGeometry=new T.ConeGeometry(.12,.42,3);const tuftMat=mat(0x5f9852);con
 for(let i=0;i<580&&count<360;i++){const x=(rand()-.5)*40,z=(rand()-.5)*40;if(Math.hypot(x,z)>20||Math.abs(x)<2||Math.abs(z-4)<2||obstacles.some(o=>Math.hypot(x-o.x,z-o.z)<o.r+.7))continue;dummy.position.set(x,.12,z);dummy.scale.set(.7+rand()*.7,.5+rand()*.7,.7+rand()*.7);dummy.rotation.set((rand()-.5)*.55,rand()*6.28,(rand()-.5)*.55);dummy.updateMatrix();tufts.setMatrixAt(count++,dummy.matrix)}tufts.count=count;tufts.instanceMatrix.needsUpdate=true;land.add(tufts);
 const stepping=mat(0xe8d7b8);for(let z=-7.7;z<13;z+=2.3){const stone=mesh(land,new T.BoxGeometry(1.7,.035,.8),stepping,(rand()-.5)*.3,.047,z,false);stone.rotation.y=(rand()-.5)*.12}
 const cloudMat=mat(0xffffff,{roughness:1});const clouds=[];for(const [x,y,z] of [[-25,13,-24],[15,16,-30],[30,12,0],[-27,15,13]]){const g=new T.Group();for(const [a,b,c,r] of [[0,0,0,2.1],[-1.8,-.2,0,1.5],[1.7,-.15,.2,1.6],[.4,.6,0,1.6]]){const puff=sphere(g,r,cloudMat,a,b,c,10);puff.castShadow=false;puff.scale.y=.6}g.position.set(x,y,z);scene.add(g);clouds.push({g,x})}
-const station={x:0,z:-10};cyl(land,1.55,1.7,.3,M.stone,station.x,.15,station.z,12);const crystal=mesh(land,new T.OctahedronGeometry(.9),M.light,station.x,1.6,station.z);const beacon=mesh(land,new T.TorusGeometry(1.38,.055,8,40),M.light,station.x,.35,station.z,false);beacon.rotation.x=Math.PI/2;
-const marker=new T.Group();land.add(marker);const diamond=mesh(marker,new T.OctahedronGeometry(.24),mat(0xffd65f,{emissive:0xffb22f,emissiveIntensity:.8}));marker.position.set(station.x,3.4,station.z);
+const stationRoot=new T.Group();scene.add(stationRoot);
+const station={x:0,z:-10};cyl(stationRoot,1.55,1.7,.3,M.stone,station.x,.15,station.z,12);const crystal=mesh(stationRoot,new T.OctahedronGeometry(.9),M.light,station.x,1.6,station.z);const beacon=mesh(stationRoot,new T.TorusGeometry(1.38,.055,8,40),M.light,station.x,.35,station.z,false);beacon.rotation.x=Math.PI/2;
+const marker=new T.Group();stationRoot.add(marker);const diamond=mesh(marker,new T.OctahedronGeometry(.24),mat(0xffd65f,{emissive:0xffb22f,emissiveIntensity:.8}));marker.position.set(station.x,3.4,station.z);
 function playerModel(){
 const p=new T.Group(),body=new T.Group();p.add(body);
 const capsule=(g,r,len,m,x,y,z)=>mesh(g,new T.CapsuleGeometry(r,len,4,10),m,x,y,z);
@@ -75,6 +77,17 @@ plush(phoenix,M.light,0,.37,-.47,.30,.30,.30);
 phoenix.position.set(1.5,.65,8.5);modelTargets.push(["phoenix-companion",phoenix]);
 for(const [x,z,s] of [[-11,12,.85],[12,13,.9],[-9,-9,.9],[11,-14,.7]]){const g=new T.Group();g.position.set(x,0,z);g.scale.setScalar(s);land.add(g);sphere(g,.45,M.stone,0,.3,0,7);block(x,z,.7*s);modelTargets.push(["rock-moss",g])}
 if(window.PhoenixAssets&&T.GLTFLoader){const assets=window.PhoenixAssets.create(T);Promise.all(modelTargets.map(([name,g])=>assets.mount(name,g))).then(results=>{const count=results.filter(Boolean).length;report("assets",count+"/"+results.length);console.info("Phoenix assets loaded",count+"/"+results.length)});}else report("assets","fallback");
+let valley;
+import("./art-slice/world.js").then(async ({buildValley})=>{
+  const environment=new T.Group();
+  valley=await buildValley(T,environment);
+  scene.add(environment);
+  land.visible=false;ocean.visible=false;
+  clouds.forEach(({g})=>g.visible=false);
+  player.visible=false;phoenix.visible=false;
+  stationRoot.position.y=valley.floor(station.x,station.z);
+  obstacles.splice(0,obstacles.length,...valley.obstacles);
+}).catch(error=>console.warn("Valley assets unavailable",error));
 let guide=false,yaw=0,pitch=.43,vy=0,grounded=true,step=0,lit=false,quizIndex=0,waiting=false,modal=false,saveFailed=false;const keys=new Set();
 function refresh(){const done=C.stars(state);$("stars").textContent=done;$("objective").textContent=done?t("done"):t("objective");$("hint").textContent=done?t("hintDone"):guide?t("hintGuide"):t("hint");if(saveFailed)$("hint").textContent+=" · "+t("saveError");$("guide").textContent=guide?t("stopGuide"):t("guide")}
 function persist(){saveFailed=!C.save(storage,state);refresh()}
@@ -94,7 +107,7 @@ const spectrum=$("spectrum");["#fd6a65","#ffa74f","#ffe46d","#8dde7b","#6ed9f5",
 function showQuestion(){const item=C.quiz[quizIndex],q={q:t(item.q),options:item.options.map(key=>t(key)),answer:item.answer,explain:t(item.explain)};$("lessonText").textContent=q.q;$("answers").replaceChildren();$("feedback").textContent="";q.options.forEach((o,i)=>{let b=document.createElement("button");b.textContent=o;b.onclick=()=>{if(waiting)return;if(i!==q.answer){$("feedback").textContent=t("retry")+" "+q.explain;return}waiting=true;$("feedback").textContent=t("correct")+" "+q.explain;[...$("answers").children].forEach(x=>x.disabled=true);let next=document.createElement("button");next.textContent=quizIndex+1<C.quiz.length?t("next"):t("claim");next.onclick=()=>{waiting=false;if(++quizIndex<C.quiz.length)showQuestion();else finish()};$("answers").append(next)};$("answers").append(b)})}
 $("light").onclick=()=>{if(lit)return;lit=true;$("rays").setAttribute("opacity","1");$("light").disabled=true;$("lessonText").textContent=t("lessonLit");$("answers").replaceChildren();let b=document.createElement("button");b.textContent=t("challenge");b.onclick=()=>{$("experiment").hidden=true;showQuestion()};$("answers").append(b)};
 function finish(){const fresh=C.complete(state);persist();$("experiment").hidden=true;$("lessonTitle").textContent=t("badge");$("lessonText").textContent=fresh?t("earned",{name:state.name}):t("already");$("feedback").textContent="";$("answers").replaceChildren();let b=document.createElement("button");b.textContent=t("back");b.onclick=()=>$("lesson").close();$("answers").append(b)}
-const moveKeys=new Set(["w","a","s","d","ArrowUp","ArrowDown","ArrowLeft","ArrowRight"," ","e"]);
+const moveKeys=new Set(["Shift","w","a","s","d","ArrowUp","ArrowDown","ArrowLeft","ArrowRight"," ","e"]);
 addEventListener("keydown",e=>{if(isModal()||["INPUT","TEXTAREA","SELECT"].includes(e.target.tagName))return;const k=e.key.length===1?e.key.toLowerCase():e.key;if(!moveKeys.has(k)||(k===" "&&e.target.tagName==="BUTTON"))return;e.preventDefault();if(k===" "){if(!e.repeat)jump()}else if(k==="e"){if(!e.repeat)interact()}else keys.add(k)});
 addEventListener("keyup",e=>keys.delete(e.key.length===1?e.key.toLowerCase():e.key));addEventListener("blur",clearInput);document.addEventListener("visibilitychange",()=>{if(document.hidden)clearInput()});
 let drag=null;canvas.addEventListener("pointerdown",e=>{drag={id:e.pointerId,x:e.clientX,y:e.clientY};canvas.setPointerCapture(e.pointerId)});canvas.addEventListener("pointermove",e=>{if(!drag||drag.id!==e.pointerId)return;yaw-=(e.clientX-drag.x)*.006;pitch=Math.max(.18,Math.min(.85,pitch+(e.clientY-drag.y)*.004));drag.x=e.clientX;drag.y=e.clientY});for(const event of ["pointerup","pointercancel","lostpointercapture"])canvas.addEventListener(event,e=>{if(drag?.id===e.pointerId)drag=null});
@@ -104,7 +117,8 @@ function guideTarget(x,z){const dx=station.x-x,dz=station.z-z,d=Math.hypot(dx,dz
 const camOffset=new T.Vector3(),look=new T.Vector3(),target=new T.Vector3();function resize(){const w=world.clientWidth,h=world.clientHeight;if(!w||!h)return;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix()}addEventListener("resize",resize);resize();
 let last=performance.now(),time=0,nearPrev=null;function tick(now){const dt=Math.min(.045,(now-last)/1000);last=now;time+=dt;requestAnimationFrame(tick);
 let ix=0,iz=0;if(!isModal()){ix=(keys.has("d")||keys.has("ArrowRight")?1:0)-(keys.has("a")||keys.has("ArrowLeft")?1:0);iz=(keys.has("s")||keys.has("ArrowDown")?1:0)-(keys.has("w")||keys.has("ArrowUp")?1:0)}
-const moving=ix!==0||iz!==0;if(moving){const n=Math.hypot(ix,iz);ix/=n;iz/=n;const dx=(ix*Math.cos(yaw)+iz*Math.sin(yaw))*dt*5,dz=(-ix*Math.sin(yaw)+iz*Math.cos(yaw))*dt*5;if(allowed(player.position.x+dx,player.position.z))player.position.x+=dx;if(allowed(player.position.x,player.position.z+dz))player.position.z+=dz;player.rotation.y=Math.atan2(-dx,-dz);step+=dt*12}
+const running=keys.has("Shift")||touchDevice;const speed=running?6:4.5;
+const moving=ix!==0||iz!==0;if(moving){const n=Math.hypot(ix,iz);ix/=n;iz/=n;const dx=(ix*Math.cos(yaw)+iz*Math.sin(yaw))*dt*speed,dz=(-ix*Math.sin(yaw)+iz*Math.cos(yaw))*dt*speed;if(allowed(player.position.x+dx,player.position.z))player.position.x+=dx;if(allowed(player.position.x,player.position.z+dz))player.position.z+=dz;player.rotation.y=Math.atan2(-dx,-dz);step+=dt*12}
 if(!grounded&&!isModal()){vy-=dt*14;player.position.y+=vy*dt;if(player.position.y<=0){player.position.y=0;vy=0;grounded=true}}
 const swing=moving&&grounded?Math.sin(step)*.62:0;const ease=1-Math.exp(-dt*12);
 const poses=grounded?[swing,-swing,-swing*.8,swing*.8]:[-.42,.29,-.65,-.65];
@@ -115,8 +129,18 @@ if(guide){const [x,z]=guideTarget(player.position.x,player.position.z);target.se
 if(!isModal())phoenix.position.lerp(target,1-Math.exp(-dt*3.7));// Face the camera when accompanying the player; smooth turn, no abrupt spins.
 const facing=Math.atan2(phoenix.position.x-camera.position.x,phoenix.position.z-camera.position.z);const turn=Math.atan2(Math.sin(facing-phoenix.rotation.y),Math.cos(facing-phoenix.rotation.y));phoenix.rotation.y+=turn*(1-Math.exp(-dt*7));
 crystal.rotation.y+=dt*.65;crystal.position.y=1.5+Math.sin(time*2)*.13;marker.position.y=3.3+Math.sin(time*3)*.19;diamond.rotation.y+=dt;
+if(valley){
+  valley.hero.position.copy(player.position);
+  valley.hero.position.y+=valley.floor(player.position.x,player.position.z);
+  valley.hero.rotation.y=player.rotation.y+Math.PI;
+  valley.mascot.position.copy(phoenix.position);
+  valley.mascot.position.y+=valley.floor(phoenix.position.x,phoenix.position.z);
+  valley.mascot.rotation.y=phoenix.rotation.y;
+  valley.animateCompanion(time);
+  valley.pose(!grounded?"Jump_Idle":moving?(running?"Running_A":"Walking_A"):"Unarmed_Idle",dt);
+}
 const near=distance()<=3;if(near!==nearPrev){nearPrev=near;$("near").textContent=near?t("near"):t(touchDevice?"touchControls":"controls")}
-const range=touchDevice?10.5:8.6;camOffset.set(Math.sin(yaw)*Math.cos(pitch)*range,Math.sin(pitch)*range,Math.cos(yaw)*Math.cos(pitch)*range);look.copy(player.position).add(new T.Vector3(0,1.15,0));// Conservative camera shortening near solid obstacles (not a full physics raycast).
+const range=touchDevice?10.5:8.6;camOffset.set(Math.sin(yaw)*Math.cos(pitch)*range,Math.sin(pitch)*range,Math.cos(yaw)*Math.cos(pitch)*range);look.copy(player.position).add(new T.Vector3(0,1.15,0));if(valley)look.y+=valley.floor(player.position.x,player.position.z); // Conservative camera shortening near solid obstacles (not a full physics raycast).
 let cameraFactor=1;for(let f=.18;f<=1;f+=.08){const cx=look.x+camOffset.x*f,cz=look.z+camOffset.z*f,cy=look.y+camOffset.y*f;if(cy<4.8&&obstacles.some(o=>Math.hypot(cx-o.x,cz-o.z)<o.r+.15)){cameraFactor=Math.max(.2,f-.1);break}}
 camera.position.copy(look).addScaledVector(camOffset,cameraFactor);camera.lookAt(look);renderer.render(scene,camera);if(qa){report("ready","true");report("x",player.position.x.toFixed(2));report("y",player.position.y.toFixed(2));report("z",player.position.z.toFixed(2));report("yaw",yaw.toFixed(2));report("near",near);report("guide",guide)}}
 document.addEventListener("phoenix:locale",()=>{refresh();nearPrev=null;if(!isModal())canvas.focus({preventScroll:true})});

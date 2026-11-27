@@ -1,5 +1,5 @@
-# Art review 01 — Thung lũng Ánh Sáng
-Independent visual review, not an MVP or a replacement for the old game.
-Run from repository root: python v2/art-slice/fetch-assets.py ; python -m http.server 8000 ; open /v2/art-slice/.
-Artist-made sources: Quaternius Stylized Nature MegaKit Standard and Medieval Village MegaKit Standard (CC0, mirrored at pinned commit in sources.json); KayKit Adventurers (CC0, official repository). Importer writes checksums and original license notices. No payment required. Models are downloaded at build time and packaged in the preview. 
-Scene: sculpted terrain, winding path, warm lighting, artist-authored trees, vegetation, rock and modular cottage, rigged Rogue as temporary player. Original rejected V2 Phoenix retained strictly as scale comparison, not redesigned or approved; replace after review. Model styles and cottage assembly must be visually checked. No gameplay or mobile acceptance in this branch; V2 gameplay stays untouched. Art approval requires actual screenshots and user review.
+# Thung lũng Ánh Sáng
+
+Chạy `python3 -m http.server 8000` từ thư mục gốc. Mở `/v2/` để chơi hoặc `/v2/art-slice/` để xoay camera và xem cận cảnh.
+
+Địa hình, cầu, cảnh nền và chuyển động Phoenix được tạo trong dự án. Cây và kiến trúc dùng Quaternius Stylized Nature / Medieval Village, nhân vật dùng KayKit Adventurers (CC0). Nguồn gốc được ghim trong sources.json, giấy phép và checksum nằm trong models/. fetch-assets.py tải lại cùng bộ asset và Meshopt Decoder.

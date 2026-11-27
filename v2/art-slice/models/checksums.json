@@ -1,0 +1,92 @@
+{
+  "tree-a.glb": {
+    "sha256": "a567e3095af4ff8329218e4c29d76a6752bcac3b42337ce5dca34f1b625f18eb",
+    "bytes": 285236,
+    "source": "https://raw.githubusercontent.com/parrisdigital/repo-magical-kingdom/214dec451d66358af7be4df42ad44c9bdf0a8cb8/public/assets/world/quaternius/nature/CommonTree_1.glb"
+  },
+  "tree-b.glb": {
+    "sha256": "e9aec4c0ca2f662630f91d8d666b3aed57d1f15c7ce4e786b9e2b8f648337511",
+    "bytes": 269832,
+    "source": "https://raw.githubusercontent.com/parrisdigital/repo-magical-kingdom/214dec451d66358af7be4df42ad44c9bdf0a8cb8/public/assets/world/quaternius/nature/CommonTree_2.glb"
+  },
+  "pine.glb": {
+    "sha256": "429b5a3aefff6028cb87cb6c3df60c425008154adc9d36aefd5ecc4dd7f46312",
+    "bytes": 177952,
+    "source": "https://raw.githubusercontent.com/parrisdigital/repo-magical-kingdom/214dec451d66358af7be4df42ad44c9bdf0a8cb8/public/assets/world/quaternius/nature/Pine_1.glb"
+  },
+  "bush.glb": {
+    "sha256": "dc894c06ce3d0c8fc3a5600e7a95f72843642640a9f0645726a3fceb3e44a210",
+    "bytes": 176380,
+    "source": "https://raw.githubusercontent.com/parrisdigital/repo-magical-kingdom/214dec451d66358af7be4df42ad44c9bdf0a8cb8/public/assets/world/quaternius/nature/Bush_Common_Flowers.glb"
+  },
+  "flowers.glb": {
+    "sha256": "f827a03fc2166e62710ea4cd32af64a908b46197e551e88b9d8a2bab901219d5",
+    "bytes": 187080,
+    "source": "https://raw.githubusercontent.com/parrisdigital/repo-magical-kingdom/214dec451d66358af7be4df42ad44c9bdf0a8cb8/public/assets/world/quaternius/nature/Flower_3_Group.glb"
+  },
+  "fern.glb": {
+    "sha256": "f6b4956a8380da67c6719d94de3fa09bdaf438a205018da648543f9dbb70bfdb",
+    "bytes": 122292,
+    "source": "https://raw.githubusercontent.com/parrisdigital/repo-magical-kingdom/214dec451d66358af7be4df42ad44c9bdf0a8cb8/public/assets/world/quaternius/nature/Fern_1.glb"
+  },
+  "rock.glb": {
+    "sha256": "cd98da63753e4d868eb03f05046e7be7eea4ef8ba25253ec8b09cb59ffe97e0d",
+    "bytes": 59152,
+    "source": "https://raw.githubusercontent.com/parrisdigital/repo-magical-kingdom/214dec451d66358af7be4df42ad44c9bdf0a8cb8/public/assets/world/quaternius/nature/Rock_Medium_1.glb"
+  },
+  "grass.glb": {
+    "sha256": "f1bd30e3f3f7922cc001c423779f2c7efe1ea80810056a20521f090f548cef38",
+    "bytes": 6276,
+    "source": "https://raw.githubusercontent.com/parrisdigital/repo-magical-kingdom/214dec451d66358af7be4df42ad44c9bdf0a8cb8/public/assets/world/quaternius/nature/Grass_Common_Short.glb"
+  },
+  "wall.glb": {
+    "sha256": "e651e01a5d204f1feb7d9b0324b76fa295ebeb2ea93f7f6b8b12977091e1bfa5",
+    "bytes": 265320,
+    "source": "https://raw.githubusercontent.com/parrisdigital/repo-magical-kingdom/214dec451d66358af7be4df42ad44c9bdf0a8cb8/public/assets/world/quaternius/medieval/Wall_Plaster_Straight.glb"
+  },
+  "door.glb": {
+    "sha256": "992339ed44c5a137e223642c1e050a3e22470cff6bee152360757d15d4bab5b8",
+    "bytes": 388596,
+    "source": "https://raw.githubusercontent.com/parrisdigital/repo-magical-kingdom/214dec451d66358af7be4df42ad44c9bdf0a8cb8/public/assets/world/quaternius/medieval/Wall_Plaster_Door_Round.glb"
+  },
+  "window.glb": {
+    "sha256": "fb7b2be7c74093deed912567c72e792b962d3b228885215cc60285045ccddddb",
+    "bytes": 405264,
+    "source": "https://raw.githubusercontent.com/parrisdigital/repo-magical-kingdom/214dec451d66358af7be4df42ad44c9bdf0a8cb8/public/assets/world/quaternius/medieval/Wall_Plaster_Window_Wide_Round.glb"
+  },
+  "roof.glb": {
+    "sha256": "fb25241ec3dcd5ff6015592e7284af343783c94f533b07f0f576d3a98a938a3b",
+    "bytes": 306076,
+    "source": "https://raw.githubusercontent.com/parrisdigital/repo-magical-kingdom/214dec451d66358af7be4df42ad44c9bdf0a8cb8/public/assets/world/quaternius/medieval/Roof_RoundTiles_4x4.glb"
+  },
+  "chimney.glb": {
+    "sha256": "79d5c2c40867f3734d538322398c83f488a8391929000bdb9429f5f2d62a30d6",
+    "bytes": 270492,
+    "source": "https://raw.githubusercontent.com/parrisdigital/repo-magical-kingdom/214dec451d66358af7be4df42ad44c9bdf0a8cb8/public/assets/world/quaternius/medieval/Prop_Chimney.glb"
+  },
+  "fence.glb": {
+    "sha256": "e5f9f7435d0515a2d288480b21c23e64db385976916f2becf255eac4f3f7c48d",
+    "bytes": 191756,
+    "source": "https://raw.githubusercontent.com/parrisdigital/repo-magical-kingdom/214dec451d66358af7be4df42ad44c9bdf0a8cb8/public/assets/world/quaternius/medieval/Prop_WoodenFence_Single.glb"
+  },
+  "nature-license.txt": {
+    "sha256": "120710e542c3ebaf83856c4eb55b4a1e680593b39302eba7fdc5d942dfe78c58",
+    "bytes": 852,
+    "source": "https://raw.githubusercontent.com/parrisdigital/repo-magical-kingdom/214dec451d66358af7be4df42ad44c9bdf0a8cb8/public/assets/world/quaternius/licenses/Stylized_Nature_MegaKit_Standard_LICENSE.txt"
+  },
+  "village-license.txt": {
+    "sha256": "ec6fd5004514cb0515a7dc1065f474644d31698861597b32e1745945ffec71de",
+    "bytes": 840,
+    "source": "https://raw.githubusercontent.com/parrisdigital/repo-magical-kingdom/214dec451d66358af7be4df42ad44c9bdf0a8cb8/public/assets/world/quaternius/licenses/Medieval_Village_MegaKit_Standard_LICENSE.txt"
+  },
+  "explorer.glb": {
+    "sha256": "e825437cd4d2ee9c1960b517a74a69101e33eb409ae7fa8cedc7134a998fbb7d",
+    "bytes": 3616284,
+    "source": "https://raw.githubusercontent.com/KayKit-Game-Assets/KayKit-Character-Pack-Adventures-1.0/672074b73ba276876a19e8816ecdc5241817ab47/addons/kaykit_character_pack_adventures/Characters/gltf/Rogue.glb"
+  },
+  "character-license.txt": {
+    "sha256": "ae322141814056dda0deea7540d74c41d87aee1da319977cd1bd84ee5a923629",
+    "bytes": 891,
+    "source": "https://raw.githubusercontent.com/KayKit-Game-Assets/KayKit-Character-Pack-Adventures-1.0/672074b73ba276876a19e8816ecdc5241817ab47/LICENSE.txt"
+  }
+}
