@@ -11,7 +11,7 @@ const fill=new T.DirectionalLight(0xb7d9ff,.6);fill.position.set(8,8,-10);scene.
 const {buildValley}=await import("./world.js");
 const valley=await buildValley(T,scene,(n,total)=>status.textContent="Đang tải "+n+"/"+total);
 const hoverHeight=valley.mascot.position.y;
-const shots={wide:{eye:[8,5.4,17],target:[-2,2,-3]},gameplay:{eye:[1,3.3,10.8],target:[0,1.3,1]},character:{eye:[1.6,1.65,7.15],target:[.8,1.05,4.2]},phoenix:{eye:[2.48,1.97,6.05],target:[2.1,1.4,4]}};
+const shots={mobile:{eye:[1.4,2.4,10.2],target:[1.25,1.18,4]},wide:{eye:[8,5.4,17],target:[-2,2,-3]},gameplay:{eye:[1,3.3,10.8],target:[0,1.3,1]},character:{eye:[1.6,1.65,7.15],target:[.8,1.05,4.2]},phoenix:{eye:[1.66,1.64,5.79],target:[2.1,1.4,4]}};
 function shot(name){const s=shots[name];camera.position.set(...s.eye);controls.target.set(...s.target);controls.update();document.body.dataset.shot=name}
 document.querySelectorAll("[data-shot]").forEach(b=>b.onclick=()=>shot(b.dataset.shot));
 function resize(){const w=view.clientWidth,h=view.clientHeight;renderer.setSize(w,h);camera.aspect=w/h;camera.updateProjectionMatrix()}window.addEventListener("resize",resize);resize();shot(new URLSearchParams(location.search).get("shot")||"wide");document.body.dataset.qa=new URLSearchParams(location.search).has("qa");

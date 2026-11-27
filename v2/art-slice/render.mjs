@@ -7,7 +7,7 @@ try{
  const errors=[];page.on("pageerror",e=>errors.push(e.message));page.on("console",m=>{if(m.type()==="error")console.log(m.text())});
  for(const shot of ["wide","gameplay","character","phoenix","mobile"]){
   if(shot==="mobile") await page.setViewportSize({width:390,height:844});
-  await page.goto("http://127.0.0.1:8000/v2/art-slice/?qa=1&shot="+(shot==="mobile"?"gameplay":shot));
+  await page.goto("http://127.0.0.1:8000/v2/art-slice/?qa=1&shot="+shot);
   await page.waitForFunction(()=>window.artReady||window.artError,{},{timeout:120000});
   const fail=await page.evaluate(()=>window.artError);if(fail)throw Error(fail);
   await page.waitForTimeout(1500);

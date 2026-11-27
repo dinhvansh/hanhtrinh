@@ -36,6 +36,11 @@ const right=place("window",homeX+2,homeZ,wallH,-Math.PI/2,{y:level});
 for(const part of [front,back,left,right]){part.clone.scale.x*=4.1/part.width}
 timber(homeX,level+1.2,homeZ,3.85,3.35,3.85,0xad7655);
 timber(homeX,level+1,homeZ+1.97,1.15,2.25,.12,0x80543f);
+// Light behind the round window and painted slats on the entry.
+timber(homeX+1.96,level+1.52,homeZ,.08,1.65,2.1,0xffcd81);
+for(const offset of [-.55,0,.55])timber(homeX+2.012,level+1.5,homeZ+offset,.05,1.6,.075,0x734d38);
+for(let i=-2;i<=2;i++)timber(homeX+i*.19,level+.98,homeZ+2.05,.17,1.92,.08,0x547f75);
+timber(homeX+.28,level+.96,homeZ+2.12,.09,.1,.08,0xf6be58);
 const roof=place("roof",homeX,homeZ,2.5,0,{y:level+wallH-.1});roof.clone.scale.x*=5.2/roof.width;roof.clone.scale.z*=5.2/roof.depth;
 place("chimney",homeX-1.2,homeZ-.7,1.4,0,{y:level+3.9});
 for(const [x,z] of [[-9.7,1],[-8.1,1],[-6.5,1]])place("fence",x,z,.85,0);
@@ -61,7 +66,8 @@ for(const root of staticRoots){
   root.updateMatrixWorld(true);
   root.traverse(node=>{
     if(!node.isMesh)return;
-    const key=node.geometry.uuid+":"+(Array.isArray(node.material)?node.material.map(m=>m.uuid).join():node.material.uuid);
+    const cellX=Math.floor(node.matrixWorld.elements[12]/10),cellZ=Math.floor(node.matrixWorld.elements[14]/10);
+    const key=cellX+","+cellZ+":"+node.geometry.uuid+":"+(Array.isArray(node.material)?node.material.map(m=>m.uuid).join():node.material.uuid);
     if(!batches.has(key))batches.set(key,{node,matrices:[]});
     batches.get(key).matrices.push(node.matrixWorld.clone());
   });
@@ -73,8 +79,21 @@ for(const {node,matrices} of batches.values()){
   batch.castShadow=true;batch.receiveShadow=true;scene.add(batch);
 }
 const explorer=place("explorer",.7,4.2,1.85,.18);const mixer=new T.AnimationMixer(explorer.clone);const idle=assets.explorer.animations.find(a=>a.name==="Unarmed_Idle");if(idle)mixer.clipAction(idle).play();
+// A rolled field map tucked behind the shoulder.
+const chest=explorer.clone.getObjectByName("chest");
+const roll=new T.Mesh(new T.CylinderGeometry(.085,.085,.56,16),new T.MeshStandardMaterial({color:0xf6dbac}));
+roll.position.set(0,.04,-.24);roll.rotation.z=1.26;chest.add(roll);
+for(const y of [-.15,.15]){
+  const binding=new T.Mesh(new T.CylinderGeometry(.089,.089,.045,16),new T.MeshStandardMaterial({color:0x896548}));
+  binding.position.y=y;roll.add(binding);
+}
 // Use the identity and palette of the original companion.
 const original=await loader.loadAsync(new URL("../assets/models/phoenix-companion.gltf",import.meta.url).href);const mascot=original.scene;const bb=new T.Box3().setFromObject(mascot),ss=bb.getSize(new T.Vector3());mascot.scale.setScalar(1.35/ss.y);mascot.position.set(2.1,h(2.1,4)+.7,4);mascot.rotation.y=Math.PI;scene.add(mascot);mascot.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true}});
+// A fine brass orbit and a four-point glint give the companion its own magical motif.
+const orbit=new T.Mesh(new T.TorusGeometry(.205,.012,8,48),new T.MeshStandardMaterial({color:0xffcf85,metalness:.35,roughness:.42}));
+orbit.position.set(0,.37,-.48);orbit.rotation.x=.9;orbit.rotation.y=-.36;mascot.add(orbit);
+const glint=new T.Mesh(new T.OctahedronGeometry(.046),new T.MeshStandardMaterial({color:0xffeac3,emissive:0xf5bb65,emissiveIntensity:.4}));
+glint.scale.set(.72,1.5,.6);glint.position.set(.182,.45,-.5);mascot.add(glint);
 const eyeParts=mascot.children.filter(node=>/plush_(eye|iris|white)/.test(node.name)&&node.position.y>.8);
 const eyeRest=eyeParts.map(node=>({y:node.position.y,scale:node.scale.y}));
 
