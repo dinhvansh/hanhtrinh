@@ -1,0 +1,35 @@
+name: Phoenix MVP smoke
+on:
+  push:
+    branches: [dev/v2-adventure]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-save --package-lock=false playwright@1.58.2
+      - run: npx playwright install --with-deps chromium
+      - run: |
+          python3 -m http.server 8000 > /tmp/phoenix-http.log 2>&1 &
+          for i in $(seq 1 20); do curl -fsS http://127.0.0.1:8000/v2/ > /dev/null && break; sleep 1; done
+          node v2/tools/smoke.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: phoenix-preview-screenshots
+          path: qa-output/
+          if-no-files-found: ignore
+      - uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: phoenix-mvp-preview
+          path: |
+            v2/
+            index.html
