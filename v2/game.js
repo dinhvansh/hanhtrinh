@@ -43,7 +43,7 @@ function clearInput(){keys.clear();drag=null}
 function showWelcome(){$("name").value=state.name;clearInput();$("welcome").showModal()}
 $("nameform").addEventListener("submit",e=>{e.preventDefault();state.name=$("name").value.trim().slice(0,24)||"Nhà khám phá";persist();$("welcome").close()});
 $("profile").onclick=showWelcome;$("reset").onclick=()=>{if(confirm("Xóa tiến trình V2 và bắt đầu lại?")){C.reset(storage);state=C.fresh();persist();player.position.set(0,0,10);vy=0;grounded=true;guide=false;refresh();showWelcome()}};
-$("guide").onclick=()=>{guide=!guide;refresh()};
+$("guide").onclick=e=>{guide=!guide;refresh();if(e.detail>0)$("guide").blur()};
 function jump(){if(!isModal()&&grounded){vy=5.6;grounded=false}}
 $("jump").onclick=jump;
 const distance=()=>Math.hypot(player.position.x-station.x,player.position.z-station.z);
@@ -54,7 +54,7 @@ function showQuestion(){const q=C.quiz[quizIndex];$("lessonText").textContent=q.
 $("light").onclick=()=>{if(lit)return;lit=true;$("rays").setAttribute("opacity","1");$("light").disabled=true;$("lessonText").textContent="Giọt nước làm ánh sáng khúc xạ, phản xạ bên trong rồi tán sắc thành các màu khi đi ra.";$("answers").replaceChildren();let b=document.createElement("button");b.textContent="Thử thách kiến thức";b.onclick=()=>{$("experiment").hidden=true;showQuestion()};$("answers").append(b)};
 function finish(){const fresh=C.complete(state);persist();$("experiment").hidden=true;$("lessonTitle").textContent="Huy hiệu Bảy Sắc";$("lessonText").textContent=fresh?"Tuyệt vời, "+state.name+"! Con đã nhận một sao Phoenix.":"Con đã sở hữu huy hiệu này. Chơi lại không cộng thêm sao.";$("feedback").textContent="";$("answers").replaceChildren();let b=document.createElement("button");b.textContent="Về đảo";b.onclick=()=>$("lesson").close();$("answers").append(b)}
 const moveKeys=new Set(["w","a","s","d","ArrowUp","ArrowDown","ArrowLeft","ArrowRight"," ","e"]);
-addEventListener("keydown",e=>{if(isModal()||e.target.tagName==="INPUT"||e.target.tagName==="BUTTON")return;const k=e.key.length===1?e.key.toLowerCase():e.key;if(!moveKeys.has(k))return;e.preventDefault();if(k===" "){if(!e.repeat)jump()}else if(k==="e"){if(!e.repeat)interact()}else keys.add(k)});
+addEventListener("keydown",e=>{if(isModal()||["INPUT","TEXTAREA","SELECT"].includes(e.target.tagName))return;const k=e.key.length===1?e.key.toLowerCase():e.key;if(!moveKeys.has(k)||(k===" "&&e.target.tagName==="BUTTON"))return;e.preventDefault();if(k===" "){if(!e.repeat)jump()}else if(k==="e"){if(!e.repeat)interact()}else keys.add(k)});
 addEventListener("keyup",e=>keys.delete(e.key.length===1?e.key.toLowerCase():e.key));addEventListener("blur",clearInput);document.addEventListener("visibilitychange",()=>{if(document.hidden)clearInput()});
 let drag=null;canvas.addEventListener("pointerdown",e=>{drag={id:e.pointerId,x:e.clientX,y:e.clientY};canvas.setPointerCapture(e.pointerId)});canvas.addEventListener("pointermove",e=>{if(!drag||drag.id!==e.pointerId)return;yaw-=(e.clientX-drag.x)*.006;pitch=Math.max(.18,Math.min(.85,pitch+(e.clientY-drag.y)*.004));drag.x=e.clientX;drag.y=e.clientY});for(const event of ["pointerup","pointercancel","lostpointercapture"])canvas.addEventListener(event,e=>{if(drag?.id===e.pointerId)drag=null});
 document.querySelectorAll("[data-key]").forEach(b=>{const k=b.dataset.key;b.addEventListener("pointerdown",e=>{e.preventDefault();b.setPointerCapture(e.pointerId);if(!isModal())keys.add(k)});for(const ev of ["pointerup","pointercancel","lostpointercapture"])b.addEventListener(ev,()=>keys.delete(k))});
