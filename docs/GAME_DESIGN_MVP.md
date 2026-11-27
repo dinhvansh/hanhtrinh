@@ -26,6 +26,13 @@ v2/game.js: world, camera/player/companion/input/interaction/render loop.
 v2/tests.html: smoke test core. Tách module world, player, quest, content, UI khi slice được nghiệm thu; không dựng kiến trúc cho các tính năng chưa tới.
 State: {version, name, completed: {questId: true}}; sao suy ra từ completed; không tin state local cho quà thực. Family backend sau này phải xác thực chủ thể, phân quyền, ghi ledger; AI không có quyền cộng thưởng, phê duyệt, sửa quyền.
 
+## Localization / i18n (required from MVP)
+- Vietnamese default and English selectable in game, including onboarding, HUD, instructions, quiz, rewards and accessibility labels. Locale preference saved separately from progress.
+- All player-facing strings use stable translation keys; scientific question answers, quest IDs, saved progress and asset IDs are locale-independent. Add locales by extending dictionaries, without changing gameplay. Missing keys fall back to Vietnamese; avoid exposing incomplete languages in selector.
+- Future localized scientific content, family portal, rewards, AI prompts/STT/TTS, subtitles and video links follow locale-specific editorial review. No automatic translation of child-safety policies or scientific content without review. Test expansion, font coverage, RTL if needed and localized audio when added.
+- MVP initially vi/en; other languages are backlog until translations reviewed. V1 and internal asset studio are not localized by this change.
+- QA: dictionary key coverage, locale persistence, quiz rules invariant and progress unchanged when switching. Browser UI/mobile layout still requires testing.
+
 ## Milestone
 M0 — giữ baseline, docs, branch dev.
 M1 — world/player/camera/companion + input.
