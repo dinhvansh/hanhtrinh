@@ -29,8 +29,8 @@ function round(name,top,bottom,segments){
 }
 round("trunk",.35,.5,10);round("cylinder",.5,.5,12);round("cone",0,.5,10);
 function ball(name,rows,cols,smooth){const tri=[];const pt=(i,j)=>{let a=i*PI/rows,b=j*2*PI/cols;return [.5*Math.sin(a)*Math.cos(b),.5*Math.cos(a),.5*Math.sin(a)*Math.sin(b)]};for(let i=0;i<rows;i++)for(let j=0;j<cols;j++){let a=pt(i,j),b=pt(i+1,j),c=pt(i+1,j+1),d=pt(i,j+1);tri.push([a,b,c],[a,c,d])}geom(name,tri,smooth)}
-ball("foliage",5,9,false);ball("smooth",10,16,true);
-const palette={bark:"#906143",barkLight:"#b38458",leaf:"#65a56b",leafDark:"#408a66",leafLight:"#a2c878",leafGold:"#d1cf77",cream:"#fff0d6",wall:"#f4d6a7",trim:"#ad8058",roof:"#8063af",roofLight:"#a48bcf",roofDark:"#665091",glass:"#9be2e7",stone:"#a39a9a",stoneLight:"#c5bdad",flower:"#f3a0ad",stem:"#4b9365",yellow:"#ffd46c",purple:"#9872d9",purpleDark:"#65489e",eye:"#453548",blush:"#f5b6b0",orb:"#b99cff",white:"#fffaf1"};
+ball("foliage",5,9,false);ball("smooth",10,16,true);ball("plush",16,24,true);
+const palette={bark:"#906143",barkLight:"#b38458",leaf:"#65a56b",leafDark:"#408a66",leafLight:"#a2c878",leafGold:"#d1cf77",cream:"#fff0d6",face:"#fff8ed",hood:"#f2dec2",earPink:"#efb3ba",iris:"#80543f",nose:"#da9a88",wall:"#f4d6a7",trim:"#ad8058",roof:"#8063af",roofLight:"#a48bcf",roofDark:"#665091",glass:"#9be2e7",stone:"#a39a9a",stoneLight:"#c5bdad",flower:"#f3a0ad",stem:"#4b9365",yellow:"#ffd46c",purple:"#9872d9",purpleDark:"#65489e",eye:"#453548",blush:"#f5b6b0",orb:"#b99cff",white:"#fffaf1"};
 const lin=x=>x<=.04045?x/12.92:((x+.055)/1.055)**2.4;
 const color=h=>[1,3,5].map(i=>lin(parseInt(h.slice(i,i+2),16)/255));
 const B64="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
@@ -74,14 +74,36 @@ asset("rock-moss",p=>{
  p("foliage","leaf",[.14,.62,-.18],[.53,.18,.45],.2);
 }),
 asset("phoenix-companion",p=>{
- p("smooth","cream",[0,.48,.03],[.94,.98,.79]);
- p("smooth","wall",[0,.67,.075],[.98,1.02,.86]);
- p("smooth","cream",[0,.66,-.21],[.83,.81,.55]);
- for(const x of [-.28,.28]){p("cone","cream",[x,1.13,.03],[.32,.41,.31],0,-x*.9);p("smooth","cream",[x,.2,-.12],[.32,.32,.39]);p("smooth","cream",[x*1.5,.48,-.04],[.32,.39,.34])}
- for(const x of [-.155,.155]){p("smooth","eye",[x,.74,-.475],[.088,.115,.05]);p("smooth","white",[x-.012,.768,-.501],[.025,.027,.017]);p("smooth","blush",[x*1.45,.61,-.438],[.12,.06,.035])}
- p("smooth","eye",[0,.62,-.482],[.065,.035,.025]);
- p("smooth","purpleDark",[0,.35,-.42],[.41,.41,.34]);p("smooth","orb",[0,.35,-.55],[.34,.34,.31]);
- p("smooth","white",[-.06,.43,-.688],[.09,.075,.045]);
+ // Original V1 motifs: warm cream hood, pink ears, smiling face, violet orb.
+ // Front is -Z. Facial details are deliberately outside the ellipsoid surface.
+ p("plush","cream",[0,.43,.035],[.83,.76,.71]);
+ p("plush","face",[0,.40,-.28],[.57,.57,.20]);
+ p("plush","hood",[0,.94,.035],[1.09,.98,.88]);
+ p("plush","face",[0,.91,-.27],[.93,.80,.41]);
+ for(const sign of [-1,1]){
+  const x=sign*.36;
+  p("plush","hood",[x,1.42,.04],[.29,.49,.27],0,-sign*.42);
+  p("plush","earPink",[x,1.43,-.096],[.17,.33,.067],0,-sign*.42);
+  p("plush","cream",[sign*.385,.43,-.055],[.27,.39,.30],0,sign*.27);
+  p("plush","cream",[sign*.25,.13,-.19],[.29,.21,.41]);
+  // Eyes: dark espresso oval, warm iris, large visible catchlight.
+  p("plush","eye",[sign*.19,.98,-.466],[.185,.225,.10]);
+  p("plush","iris",[sign*.19,.935,-.510],[.114,.082,.025]);
+  p("plush","white",[sign*.19-.035,1.035,-.516],[.060,.064,.027]);
+  p("plush","white",[sign*.19+.037,.945,-.515],[.025,.026,.022]);
+  p("plush","blush",[sign*.30,.817,-.426],[.143,.067,.045]);
+ }
+ p("plush","nose",[0,.865,-.482],[.067,.045,.047]);
+ // Small curved smile, below nose; no exposed teeth or giant mouth.
+ for(let i=-3;i<=3;i++){const x=i*.017;const y=.786+.00095*i*i;p("smooth","eye",[x,y,-.477],[.025,.022,.022])}
+ // Violet crystal held below the face.
+ p("plush","purpleDark",[0,.37,-.415],[.35,.35,.35]);
+ p("plush","orb",[0,.37,-.47],[.30,.30,.30]);
+ p("plush","white",[-.061,.424,-.596],[.069,.065,.029]);
+ p("smooth","yellow",[.17,.37,-.475],[.045,.045,.045]);
+ p("smooth","yellow",[-.17,.37,-.475],[.045,.045,.045]);
+ p("plush","cream",[0,.40,.36],[.34,.30,.29]);
+
 })
 ];
 }
