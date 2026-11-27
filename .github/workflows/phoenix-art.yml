@@ -1,0 +1,37 @@
+name: Phoenix art review
+on:
+  push:
+    branches: [dev/art-slice]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  render:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: python3 v2/art-slice/fetch-assets.py
+      - run: npm install --no-save --package-lock=false playwright@1.58.2
+      - run: npx playwright install --with-deps chromium
+      - run: |
+          python3 -m http.server 8000 > /tmp/phoenix-art.log 2>&1 &
+          for i in $(seq 1 20); do curl -fsS http://127.0.0.1:8000/v2/art-slice/ > /dev/null && break; sleep 1; done
+          node v2/art-slice/render.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: phoenix-art-renders
+          path: art-review/
+          if-no-files-found: ignore
+      - uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: phoenix-art-preview
+          path: |
+            v2/art-slice/
+            v2/vendor/three.bundle.js
+            v2/assets/models/phoenix-companion.gltf
