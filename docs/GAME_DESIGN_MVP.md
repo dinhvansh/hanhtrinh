@@ -6,12 +6,15 @@ Trẻ khám phá thế giới 3D tự do, Phoenix dẫn nhiệm vụ chính; ki�
 
 ## MVP scope (vertical slice)
 - Người chơi: trẻ em; tạm thiết kế cho 7–12 tuổi, chưa chốt nhóm tuổi bằng nghiên cứu.
-- 1 đảo cá nhân nhỏ, phong cách low-poly ấm áp, pastel, camera third-person; phong cách phiêu lưu tham khảo, không sao chép asset của game thương mại.
+- 1 đảo cá nhân nhỏ, phong cách Stylized Fantasy 3D ấm áp, pastel, hình khối mềm, camera third-person; không lấy chất lượng hoặc quy mô Genshin làm mục tiêu.
 - Nhân vật chạy/nhảy, camera xoay, va chạm với môi trường, giới hạn đảo an toàn; bàn phím và điều khiển chạm.
 - Phoenix có chế độ đi theo hoặc dẫn tới điểm nhiệm vụ bằng script, không gọi AI.
 - Quest mẫu: Trạm Cầu Vồng (tập 11 từ V1): tìm trạm → tương tác mô phỏng ánh sáng qua giọt nước → trả lời câu hỏi → nhận sao/huy hiệu; chơi lại không cộng trùng.
 - Lưu tiến trình và biệt danh local; cho phép reset có xác nhận. Không tài khoản, không dữ liệu trẻ lên server.
 - V1 vẫn ở index.html; V2 thử nghiệm ở v2/index.html. Không merge tới khi nghiệm thu.
+
+## Art Direction (đã chốt)
+Stylized Fantasy 3D: hình khối tròn mềm, tỷ lệ chibi thân thiện, màu sắc tươi dịu, vật liệu đơn giản nhưng có chiều sâu, môi trường cổ tích ấm áp. Phoenix giữ nhận diện V1: mũ trùm kem, tai hồng, mắt có điểm sáng, nụ cười nhỏ, quả cầu tím. Không tạo hình quái vật, không đòi photorealism hay chất lượng AAA. Duyệt bằng ảnh render thật ở khoảng cách camera gameplay và cận cảnh, không dùng ảnh concept thay cho kết quả. Mục tiêu là đẹp và nhất quán trong ngân sách web/mobile.
 
 ## Gameplay / UX
 Vào đảo → hướng dẫn ngắn → tự do khám phá → chọn Phoenix dẫn đường → tới gần trạm → tương tác → quan sát mô phỏng → trả lời → thưởng → tự do khám phá. HUD gọn: mục tiêu, sao, nút dẫn đường, tương tác, nhảy; thông báo rõ khi trạm quá xa. Không chiến đấu, không mất điểm khi sai, không countdown/streak thúc ép. Desktop WASD/mũi tên, Space nhảy, E tương tác, kéo chuột xoay camera; mobile joystick/bút điều khiển hướng, nút nhảy/tương tác, kéo nền xoay.
