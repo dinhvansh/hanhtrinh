@@ -8,8 +8,6 @@ function save(storage,state){try{storage.setItem(KEY,JSON.stringify(sanitize(sta
 function reset(storage){try{storage.removeItem(KEY);return true}catch{return false}}
 function complete(state){if(state.completed[ID])return false;state.completed[ID]=true;return true}
 function stars(state){return state.completed[ID]===true?1:0}
-const quiz=[
-{q:"Ánh sáng trắng chứa gì?",options:["Chỉ một màu trắng","Nhiều màu ánh sáng trộn lại","Chỉ màu vàng"],answer:1,explain:"Ánh sáng trắng chứa nhiều màu khác nhau."},
-{q:"Vì sao giọt nước giúp tạo cầu vồng?",options:["Ánh sáng bị khúc xạ, tách màu và phản xạ bên trong giọt","Giọt nước tự phát sáng","Giọt nước nhuộm màu bầu trời"],answer:0,explain:"Ánh sáng khúc xạ, tán sắc và phản xạ bên trong giọt nước trước khi đi tới mắt."}];
+const quiz=[{q:"q1",options:["q1a","q1b","q1c"],answer:1,explain:"q1ex"},{q:"q2",options:["q2a","q2b","q2c"],answer:0,explain:"q2ex"}];
 root.PhoenixCore={KEY,ID,fresh,sanitize,load,save,reset,complete,stars,quiz};
 })(globalThis);
