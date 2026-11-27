@@ -35,7 +35,7 @@ for(let i=0;i<150;i++){const x=(rand()-.5)*38,z=(rand()-.5)*38;if(Math.hypot(x,z
 // Frame the meadow with a few deliberate foreground flower groupings.
 for(const [x,z] of [[-4,6],[-3,3],[3,2],[4,5],[4.8,7],[-5,9],[-.9,12]]){place("flowers",x,z,.5,rand()*6);place("fern",x+.5,z-.3,.55,rand()*6)}
 const explorer=place("explorer",.7,4.2,1.85,Math.PI*.93);const mixer=new T.AnimationMixer(explorer.clone);const idle=assets.explorer.animations.find(a=>/idle/i.test(a.name));if(idle)mixer.clipAction(idle).play();
-// Keep the original V1 identity as comparison, not a new approved mascot.
+// Previous rejected V2 mascot only as a temporary scale reference; not approved art.
 const original=await loader.loadAsync("../assets/models/phoenix-companion.gltf");const mascot=original.scene;const bb=new T.Box3().setFromObject(mascot),ss=bb.getSize(new T.Vector3());mascot.scale.setScalar(1.35/ss.y);mascot.position.set(2.1,h(2.1,4)+.7,4);mascot.rotation.y=Math.PI;scene.add(mascot);mascot.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true}});
 const shots={wide:{eye:[13.4,8.2,18.8],target:[-1.5,2.1,-3]},character:{eye:[4,3.2,8.4],target:[.8,1.05,4.2]},phoenix:{eye:[3.4,2.5,7.1],target:[2.1,1.4,4]}};
 function shot(name){const s=shots[name];camera.position.set(...s.eye);controls.target.set(...s.target);controls.update();document.body.dataset.shot=name}
