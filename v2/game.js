@@ -115,7 +115,18 @@ document.querySelectorAll("[data-key]").forEach(b=>{const k=b.dataset.key;b.addE
 function allowed(x,z){return Math.hypot(x,z)<20.9&&!obstacles.some(o=>Math.hypot(x-o.x,z-o.z)<o.r+.3)}
 function guideTarget(x,z){const dx=station.x-x,dz=station.z-z,d=Math.hypot(dx,dz);if(d<2.2)return [station.x+1.4,station.z+1];const len=Math.min(3,d);const angles=[0,.45,-.45,.9,-.9,1.5,-1.5,2.2,-2.2];const theta=Math.atan2(dz,dx);for(const angle of angles){const a=theta+angle,tx=x+Math.cos(a)*len,tz=z+Math.sin(a)*len;if(allowed(tx,tz)&&[.25,.5,.75].every(f=>allowed(x+(tx-x)*f,z+(tz-z)*f)))return [tx,tz]}return [x,z]}
 const camOffset=new T.Vector3(),look=new T.Vector3(),target=new T.Vector3();function resize(){const w=world.clientWidth,h=world.clientHeight;if(!w||!h)return;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix()}addEventListener("resize",resize);resize();
-let last=performance.now(),time=0,nearPrev=null;function tick(now){const dt=Math.min(.045,(now-last)/1000);last=now;time+=dt;requestAnimationFrame(tick);
+let last=performance.now(),time=0,nearPrev=null;
+let slowFrames=0;
+function tick(now){
+const elapsed=(now-last)/1000;
+const dt=Math.min(.15,elapsed);
+last=now;
+if(elapsed>.075)slowFrames++;else slowFrames=Math.max(0,slowFrames-1);
+if(slowFrames>=7 && renderer.getPixelRatio()>.65){
+  renderer.setPixelRatio(Math.max(.65,renderer.getPixelRatio()*.8));
+  slowFrames=0;
+}
+time+=dt;requestAnimationFrame(tick);
 let ix=0,iz=0;if(!isModal()){ix=(keys.has("d")||keys.has("ArrowRight")?1:0)-(keys.has("a")||keys.has("ArrowLeft")?1:0);iz=(keys.has("s")||keys.has("ArrowDown")?1:0)-(keys.has("w")||keys.has("ArrowUp")?1:0)}
 const running=keys.has("Shift")||touchDevice;const speed=running?6:4.5;
 const moving=ix!==0||iz!==0;if(moving){const n=Math.hypot(ix,iz);ix/=n;iz/=n;const dx=(ix*Math.cos(yaw)+iz*Math.sin(yaw))*dt*speed,dz=(-ix*Math.sin(yaw)+iz*Math.cos(yaw))*dt*speed;if(allowed(player.position.x+dx,player.position.z))player.position.x+=dx;if(allowed(player.position.x,player.position.z+dz))player.position.z+=dz;player.rotation.y=Math.atan2(-dx,-dz);step+=dt*12}
