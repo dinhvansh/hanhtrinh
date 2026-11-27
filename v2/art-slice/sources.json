@@ -1,0 +1,34 @@
+{
+  "quaternius": {
+    "repo": "parrisdigital/repo-magical-kingdom",
+    "sha": "214dec451d66358af7be4df42ad44c9bdf0a8cb8",
+    "root": "public/assets/world/quaternius/",
+    "files": {
+      "tree-a.glb": "nature/CommonTree_1.glb",
+      "tree-b.glb": "nature/CommonTree_2.glb",
+      "pine.glb": "nature/Pine_1.glb",
+      "bush.glb": "nature/Bush_Common_Flowers.glb",
+      "flowers.glb": "nature/Flower_3_Group.glb",
+      "fern.glb": "nature/Fern_1.glb",
+      "rock.glb": "nature/Rock_Medium_1.glb",
+      "grass.glb": "nature/Grass_Common_Short.glb",
+      "wall.glb": "medieval/Wall_Plaster_Straight.glb",
+      "door.glb": "medieval/Wall_Plaster_Door_Round.glb",
+      "window.glb": "medieval/Wall_Plaster_Window_Wide_Round.glb",
+      "roof.glb": "medieval/Roof_RoundTiles_4x4.glb",
+      "chimney.glb": "medieval/Prop_Chimney.glb",
+      "fence.glb": "medieval/Prop_WoodenFence_Single.glb",
+      "nature-license.txt": "licenses/Stylized_Nature_MegaKit_Standard_LICENSE.txt",
+      "village-license.txt": "licenses/Medieval_Village_MegaKit_Standard_LICENSE.txt"
+    }
+  },
+  "kaykit": {
+    "repo": "KayKit-Game-Assets/KayKit-Character-Pack-Adventures-1.0",
+    "sha": "672074b73ba276876a19e8816ecdc5241817ab47",
+    "root": "",
+    "files": {
+      "explorer.glb": "addons/kaykit_character_pack_adventures/Characters/gltf/Rogue.glb",
+      "character-license.txt": "LICENSE.txt"
+    }
+  }
+}
