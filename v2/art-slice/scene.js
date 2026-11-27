@@ -1,6 +1,6 @@
 (async()=>{"use strict";
 const T=window.THREE, status=document.querySelector("#status"), view=document.querySelector("#view");let renderer;
-try{renderer=new T.WebGLRenderer({antialias:true});renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));renderer.shadowMap.enabled=true;renderer.shadowMap.type=T.PCFSoftShadowMap;renderer.outputColorSpace=T.SRGBColorSpace;renderer.toneMapping=T.ACESFilmicToneMapping;renderer.toneMappingExposure=1.06;view.append(renderer.domElement);
+try{renderer=new T.WebGLRenderer({antialias:true,preserveDrawingBuffer:new URLSearchParams(location.search).has("qa")});renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));renderer.shadowMap.enabled=true;renderer.shadowMap.type=T.PCFSoftShadowMap;renderer.outputColorSpace=T.SRGBColorSpace;renderer.toneMapping=T.ACESFilmicToneMapping;renderer.toneMappingExposure=1.06;view.append(renderer.domElement);
 const scene=new T.Scene();scene.background=new T.Color(0xbadbe4);scene.fog=new T.Fog(0xbadbe4,35,105);
 const camera=new T.PerspectiveCamera(45,1,.1,180);
 const controls=new T.OrbitControls(camera,renderer.domElement);controls.enableDamping=true;controls.maxPolarAngle=Math.PI*.48;controls.minDistance=2;controls.maxDistance=70;
@@ -42,6 +42,6 @@ const shots={wide:{eye:[13.4,8.2,18.8],target:[-1.5,2.1,-3]},character:{eye:[4,3
 function shot(name){const s=shots[name];camera.position.set(...s.eye);controls.target.set(...s.target);controls.update();document.body.dataset.shot=name}
 document.querySelectorAll("[data-shot]").forEach(b=>b.onclick=()=>shot(b.dataset.shot));
 function resize(){const w=view.clientWidth,h=view.clientHeight;renderer.setSize(w,h);camera.aspect=w/h;camera.updateProjectionMatrix()}window.addEventListener("resize",resize);resize();shot(new URLSearchParams(location.search).get("shot")||"wide");document.body.dataset.qa=new URLSearchParams(location.search).has("qa");
-const clock=new T.Clock();renderer.setAnimationLoop(()=>{const dt=Math.min(clock.getDelta(),.05);mixer.update(dt);controls.update();renderer.render(scene,camera)});status.textContent="15 model nguồn · cảnh thử mỹ thuật, chưa tích hợp gameplay";status.dataset.state="ready";window.artReady=true;
+const clock=new T.Clock();if(document.body.dataset.qa==="true"){mixer.update(0);controls.update();renderer.shadowMap.autoUpdate=false;renderer.shadowMap.needsUpdate=true;renderer.render(scene,camera);renderer.getContext().finish();}else{renderer.setAnimationLoop(()=>{const dt=Math.min(clock.getDelta(),.05);mixer.update(dt);controls.update();renderer.render(scene,camera)});}status.textContent="15 model nguồn · cảnh thử mỹ thuật, chưa tích hợp gameplay";status.dataset.state="ready";window.artReady=true;
 }catch(e){status.dataset.state="error";status.textContent=String(e);window.artError=String(e);console.error(e)}
 })();
