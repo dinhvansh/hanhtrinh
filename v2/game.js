@@ -19,6 +19,9 @@ function mesh(parent,geo,material,x=0,y=0,z=0,shadow=true){const o=new T.Mesh(ge
 const sphere=(p,r,m,x,y,z,s=14)=>mesh(p,new T.SphereGeometry(r,s,10),m,x,y,z);
 const box=(p,w,h,d,m,x,y,z)=>mesh(p,new T.BoxGeometry(w,h,d),m,x,y,z);
 const cyl=(p,r1,r2,h,m,x,y,z,n=16)=>mesh(p,new T.CylinderGeometry(r1,r2,h,n),m,x,y,z);
+// Lightweight original procedural textures: no external downloads.
+function terrainTexture(base,colors,seedValue){const c=document.createElement("canvas");c.width=c.height=128;const ctx=c.getContext("2d");ctx.fillStyle=base;ctx.fillRect(0,0,128,128);let v=seedValue;const random=()=>((v=(v*1664525+1013904223)>>>0)/4294967296);for(let i=0;i<1700;i++){ctx.fillStyle=colors[i%colors.length];ctx.globalAlpha=.13+random()*.17;ctx.fillRect(random()*128,random()*128,1+random()*3,1+random()*2)}const tex=new T.CanvasTexture(c);tex.colorSpace=T.SRGBColorSpace;tex.wrapS=tex.wrapT=T.RepeatWrapping;tex.repeat.set(16,16);return tex}
+M.grass.map=terrainTexture("#ffffff",["#93a56d","#d4e4a0","#a5c98d"],25);M.grass.needsUpdate=true;
 const land=new T.Group();scene.add(land);
 cyl(land,22,20,2,M.soil,0,-1.65,0,64);cyl(land,22,22,.65,M.grass,0,-.325,0,64);
 const ocean=mesh(scene,new T.CircleGeometry(100,80),M.water,0,-2.7,0,false);ocean.rotation.x=-Math.PI/2;
@@ -32,9 +35,32 @@ cottage(-7,3);cottage(7,3);
 const pond=mesh(land,new T.CircleGeometry(2.7,40),M.water,8,.035,-8,false);pond.rotation.x=-Math.PI/2;block(8,-8,2.5);
 let seed=29;const rand=()=>((seed=(seed*1664525+1013904223)>>>0)/4294967296);
 const flowerMats=[mat(0xffb2bd),mat(0xffd569),mat(0xbca0ee)];for(let i=0;i<80;i++){let x=(rand()-.5)*40,z=(rand()-.5)*40;if(Math.hypot(x,z)>20||Math.abs(x)<2||Math.abs(z-4)<2||obstacles.some(o=>Math.hypot(x-o.x,z-o.z)<o.r+.5))continue;const f=sphere(land,.11,flowerMats[i%3],x,.15,z,6);f.castShadow=false}
+// Decorative grass patches, small stepping stones and clouds, kept independent of collision.
+const tuftGeometry=new T.ConeGeometry(.12,.42,3);const tuftMat=mat(0x5f9852);const tufts=new T.InstancedMesh(tuftGeometry,tuftMat,360);const dummy=new T.Object3D();let count=0;
+for(let i=0;i<580&&count<360;i++){const x=(rand()-.5)*40,z=(rand()-.5)*40;if(Math.hypot(x,z)>20||Math.abs(x)<2||Math.abs(z-4)<2||obstacles.some(o=>Math.hypot(x-o.x,z-o.z)<o.r+.7))continue;dummy.position.set(x,.12,z);dummy.scale.set(.7+rand()*.7,.5+rand()*.7,.7+rand()*.7);dummy.rotation.set((rand()-.5)*.55,rand()*6.28,(rand()-.5)*.55);dummy.updateMatrix();tufts.setMatrixAt(count++,dummy.matrix)}tufts.count=count;tufts.instanceMatrix.needsUpdate=true;land.add(tufts);
+const stepping=mat(0xe8d7b8);for(let z=-7.7;z<13;z+=2.3){const stone=mesh(land,new T.BoxGeometry(1.7,.035,.8),stepping,(rand()-.5)*.3,.047,z,false);stone.rotation.y=(rand()-.5)*.12}
+const cloudMat=mat(0xffffff,{roughness:1});const clouds=[];for(const [x,y,z] of [[-25,13,-24],[15,16,-30],[30,12,0],[-27,15,13]]){const g=new T.Group();for(const [a,b,c,r] of [[0,0,0,2.1],[-1.8,-.2,0,1.5],[1.7,-.15,.2,1.6],[.4,.6,0,1.6]]){const puff=sphere(g,r,cloudMat,a,b,c,10);puff.castShadow=false;puff.scale.y=.6}g.position.set(x,y,z);scene.add(g);clouds.push({g,x})}
 const station={x:0,z:-10};cyl(land,1.55,1.7,.3,M.stone,station.x,.15,station.z,12);const crystal=mesh(land,new T.OctahedronGeometry(.9),M.light,station.x,1.6,station.z);const beacon=mesh(land,new T.TorusGeometry(1.38,.055,8,40),M.light,station.x,.35,station.z,false);beacon.rotation.x=Math.PI/2;
 const marker=new T.Group();land.add(marker);const diamond=mesh(marker,new T.OctahedronGeometry(.24),mat(0xffd65f,{emissive:0xffb22f,emissiveIntensity:.8}));marker.position.set(station.x,3.4,station.z);
-function playerModel(){const p=new T.Group();const body=box(p,.65,.75,.43,M.purple,0,1.03,0);sphere(p,.34,M.skin,0,1.65,0);sphere(p,.35,M.dark,0,1.78,.03);const face=sphere(p,.29,M.skin,0,1.6,-.09);face.scale.set(1,.92,.9);for(const x of [-.11,.11])sphere(p,.038,M.dark,x,1.65,-.34,8);box(p,.52,.57,.27,M.wood,0,1.03,.33);const legs=[],arms=[];for(const x of [-.19,.19]){const leg=new T.Group();leg.position.set(x,.67,0);p.add(leg);box(leg,.21,.47,.24,M.dark,0,-.23,0);box(leg,.25,.15,.37,M.wood,0,-.49,-.07);legs.push(leg)}for(const x of [-.42,.42]){const arm=new T.Group();arm.position.set(x,1.28,0);p.add(arm);box(arm,.17,.43,.18,M.cream,0,-.19,0);sphere(arm,.11,M.skin,0,-.44,0,8);arms.push(arm)}return {p,legs,arms}}
+function playerModel(){
+const p=new T.Group(),body=new T.Group();p.add(body);
+const capsule=(g,r,len,m,x,y,z)=>mesh(g,new T.CapsuleGeometry(r,len,4,10),m,x,y,z);
+const shirt=mat(0x876bc6),collar=mat(0xf7e7c9),leather=mat(0x99683f),boots=mat(0x54445a),hair=mat(0x493846);
+const torso=capsule(body,.31,.38,shirt,0,1.02,0);torso.scale.set(1.08,1,.76);
+const scarf=mesh(body,new T.TorusGeometry(.22,.064,8,20),collar,0,1.35,0);scarf.rotation.x=Math.PI/2;
+const head=new T.Group();head.position.set(0,1.65,0);body.add(head);
+const face=sphere(head,.34,M.skin,0,0,-.035,18);face.scale.set(1,1.04,.94);
+const cap=mesh(head,new T.SphereGeometry(.355,18,12,0,Math.PI*2,0,Math.PI*.56),hair,0,.055,.04);cap.scale.z=.98;
+const tuft=sphere(head,.19,hair,.13,.19,-.12,12);tuft.scale.set(1,.65,.85);
+for(const x of [-.32,.32])sphere(head,.087,M.skin,x,-.035,-.015,10);
+for(const x of [-.12,.12]){sphere(head,.038,M.dark,x,.025,-.34,8);sphere(head,.014,M.cream,x-.008,.035,-.371,6)}
+const pack=capsule(body,.24,.25,leather,0,1.02,.27);pack.scale.set(1.2,1,.67);const flap=box(body,.47,.19,.13,M.wood,0,1.22,.4);box(body,.105,.12,.06,collar,0,1.13,.49);
+for(const x of [-.2,.2]){box(body,.075,.62,.065,leather,x,1.04,-.235)}
+const legs=[],arms=[];
+for(const x of [-.17,.17]){const leg=new T.Group();leg.position.set(x,.67,0);p.add(leg);capsule(leg,.112,.32,boots,0,-.23,0);const boot=capsule(leg,.13,.14,leather,0,-.49,-.06);boot.rotation.x=Math.PI/2;boot.scale.y=1.05;legs.push(leg)}
+for(const x of [-.36,.36]){const arm=new T.Group();arm.position.set(x,1.27,0);p.add(arm);capsule(arm,.115,.23,collar,0,-.18,0);sphere(arm,.115,M.skin,0,-.4,0,10);arms.push(arm)}
+return {p,body,head,legs,arms};
+}
 const avatar=playerModel(),player=avatar.p;scene.add(player);player.position.set(0,0,10);
 const phoenix=new T.Group();scene.add(phoenix);sphere(phoenix,.48,M.cream,0,.48,0);const hood=sphere(phoenix,.49,M.cream,0,.68,.04);hood.scale.set(1,1.12,.94);for(const x of [-.27,.27]){let ear=mesh(phoenix,new T.ConeGeometry(.14,.34,9),M.cream,x,1.07,0);ear.rotation.z=-x}for(const x of [-.15,.15])sphere(phoenix,.049,M.dark,x,.73,-.43,8);sphere(phoenix,.18,M.light,0,.35,-.43);phoenix.position.set(1.4,1,8.5);modelTargets.push(["phoenix-companion",phoenix]);
 for(const [x,z,s] of [[-11,12,.85],[12,13,.9],[-9,-9,.9],[11,-14,.7]]){const g=new T.Group();g.position.set(x,0,z);g.scale.setScalar(s);land.add(g);sphere(g,.45,M.stone,0,.3,0,7);block(x,z,.7*s);modelTargets.push(["rock-moss",g])}
@@ -70,7 +96,11 @@ let last=performance.now(),time=0,nearPrev=null;function tick(now){const dt=Math
 let ix=0,iz=0;if(!isModal()){ix=(keys.has("d")||keys.has("ArrowRight")?1:0)-(keys.has("a")||keys.has("ArrowLeft")?1:0);iz=(keys.has("s")||keys.has("ArrowDown")?1:0)-(keys.has("w")||keys.has("ArrowUp")?1:0)}
 const moving=ix!==0||iz!==0;if(moving){const n=Math.hypot(ix,iz);ix/=n;iz/=n;const dx=(ix*Math.cos(yaw)+iz*Math.sin(yaw))*dt*5,dz=(-ix*Math.sin(yaw)+iz*Math.cos(yaw))*dt*5;if(allowed(player.position.x+dx,player.position.z))player.position.x+=dx;if(allowed(player.position.x,player.position.z+dz))player.position.z+=dz;player.rotation.y=Math.atan2(-dx,-dz);step+=dt*12}
 if(!grounded&&!isModal()){vy-=dt*14;player.position.y+=vy*dt;if(player.position.y<=0){player.position.y=0;vy=0;grounded=true}}
-const swing=moving&&grounded?Math.sin(step)*.55:0;avatar.legs[0].rotation.x=swing;avatar.legs[1].rotation.x=-swing;avatar.arms[0].rotation.x=-swing*.8;avatar.arms[1].rotation.x=swing*.8;
+const swing=moving&&grounded?Math.sin(step)*.62:0;const ease=1-Math.exp(-dt*12);
+const poses=grounded?[swing,-swing,-swing*.8,swing*.8]:[-.42,.29,-.65,-.65];
+[...avatar.legs,...avatar.arms].forEach((limb,i)=>{limb.rotation.x+=(poses[i]-limb.rotation.x)*ease});avatar.body.position.y=grounded?(moving?Math.abs(Math.sin(step))*.042:Math.sin(time*2)*.012):.025;
+avatar.head.rotation.z=moving?Math.sin(step)*.035:Math.sin(time*1.6)*.025;avatar.body.rotation.x+=( (moving?.075:0)-avatar.body.rotation.x)*ease;
+clouds.forEach(({g,x},i)=>g.position.x=x+Math.sin(time*.09+i)*1.8);
 if(guide){const [x,z]=guideTarget(player.position.x,player.position.z);target.set(x,1.3+Math.sin(time*4)*.12,z)}else target.set(player.position.x+1.35,player.position.y+1.15+Math.sin(time*4)*.12,player.position.z-1.3);
 if(!isModal())phoenix.position.lerp(target,1-Math.exp(-dt*3.7));phoenix.lookAt(player.position.x,phoenix.position.y,player.position.z);phoenix.rotateY(Math.PI);
 crystal.rotation.y+=dt*.65;crystal.position.y=1.5+Math.sin(time*2)*.13;marker.position.y=3.3+Math.sin(time*3)*.19;diamond.rotation.y+=dt;
