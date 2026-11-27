@@ -62,7 +62,17 @@ for(const x of [-.36,.36]){const arm=new T.Group();arm.position.set(x,1.27,0);p.
 return {p,body,head,legs,arms};
 }
 const avatar=playerModel(),player=avatar.p;scene.add(player);player.position.set(0,0,10);
-const phoenix=new T.Group();scene.add(phoenix);sphere(phoenix,.48,M.cream,0,.48,0);const hood=sphere(phoenix,.49,M.cream,0,.68,.04);hood.scale.set(1,1.12,.94);for(const x of [-.27,.27]){let ear=mesh(phoenix,new T.ConeGeometry(.14,.34,9),M.cream,x,1.07,0);ear.rotation.z=-x}for(const x of [-.15,.15])sphere(phoenix,.049,M.dark,x,.73,-.43,8);sphere(phoenix,.18,M.light,0,.35,-.43);phoenix.position.set(1.4,1,8.5);modelTargets.push(["phoenix-companion",phoenix]);
+const phoenix=new T.Group();scene.add(phoenix);
+// Keep a matching friendly fallback even when the network model cannot load.
+const plushFace=mat(0xfff8ed),plushHood=mat(0xf2dec2),plushPink=mat(0xefb3ba);
+function plush(parent,m,x,y,z,sx,sy,sz){const o=sphere(parent,.5,m,x,y,z,24);o.scale.set(sx,sy,sz);return o}
+plush(phoenix,M.cream,0,.43,.035,.83,.76,.71);
+plush(phoenix,plushHood,0,.94,.035,1.09,.98,.88);
+plush(phoenix,plushFace,0,.91,-.27,.93,.80,.41);
+for(const sign of [-1,1]){plush(phoenix,plushHood,sign*.36,1.42,.04,.29,.49,.27).rotation.z=-sign*.42;plush(phoenix,plushPink,sign*.36,1.43,-.096,.17,.33,.067).rotation.z=-sign*.42;plush(phoenix,M.dark,sign*.19,.98,-.466,.185,.225,.10);plush(phoenix,plushFace,sign*.19-.035,1.035,-.516,.060,.064,.027);plush(phoenix,plushPink,sign*.30,.817,-.426,.143,.067,.045);plush(phoenix,M.cream,sign*.385,.43,-.055,.27,.39,.30);plush(phoenix,M.cream,sign*.25,.13,-.19,.29,.21,.41)}
+plush(phoenix,plushPink,0,.865,-.482,.067,.045,.047);for(let i=-3;i<=3;i++)plush(phoenix,M.dark,i*.017,.786+.00095*i*i,-.477,.025,.022,.022);
+plush(phoenix,M.light,0,.37,-.47,.30,.30,.30);
+phoenix.position.set(1.5,.65,8.5);modelTargets.push(["phoenix-companion",phoenix]);
 for(const [x,z,s] of [[-11,12,.85],[12,13,.9],[-9,-9,.9],[11,-14,.7]]){const g=new T.Group();g.position.set(x,0,z);g.scale.setScalar(s);land.add(g);sphere(g,.45,M.stone,0,.3,0,7);block(x,z,.7*s);modelTargets.push(["rock-moss",g])}
 if(window.PhoenixAssets&&T.GLTFLoader){const assets=window.PhoenixAssets.create(T);Promise.all(modelTargets.map(([name,g])=>assets.mount(name,g))).then(results=>{const count=results.filter(Boolean).length;report("assets",count+"/"+results.length);console.info("Phoenix assets loaded",count+"/"+results.length)});}else report("assets","fallback");
 let guide=false,yaw=0,pitch=.43,vy=0,grounded=true,step=0,lit=false,quizIndex=0,waiting=false,modal=false,saveFailed=false;const keys=new Set();
@@ -101,8 +111,9 @@ const poses=grounded?[swing,-swing,-swing*.8,swing*.8]:[-.42,.29,-.65,-.65];
 [...avatar.legs,...avatar.arms].forEach((limb,i)=>{limb.rotation.x+=(poses[i]-limb.rotation.x)*ease});avatar.body.position.y=grounded?(moving?Math.abs(Math.sin(step))*.042:Math.sin(time*2)*.012):.025;
 avatar.head.rotation.z=moving?Math.sin(step)*.035:Math.sin(time*1.6)*.025;avatar.body.rotation.x+=( (moving?.075:0)-avatar.body.rotation.x)*ease;
 clouds.forEach(({g,x},i)=>g.position.x=x+Math.sin(time*.09+i)*1.8);
-if(guide){const [x,z]=guideTarget(player.position.x,player.position.z);target.set(x,1.3+Math.sin(time*4)*.12,z)}else target.set(player.position.x+1.35,player.position.y+1.15+Math.sin(time*4)*.12,player.position.z-1.3);
-if(!isModal())phoenix.position.lerp(target,1-Math.exp(-dt*3.7));phoenix.lookAt(player.position.x,phoenix.position.y,player.position.z);phoenix.rotateY(Math.PI);
+if(guide){const [x,z]=guideTarget(player.position.x,player.position.z);target.set(x,.67+Math.sin(time*2.5)*.085,z)}else target.set(player.position.x+Math.cos(yaw)*1.65-Math.sin(yaw)*1.05,player.position.y+.64+Math.sin(time*2.5)*.085,player.position.z-Math.sin(yaw)*1.65-Math.cos(yaw)*1.05);
+if(!isModal())phoenix.position.lerp(target,1-Math.exp(-dt*3.7));// Face the camera when accompanying the player; smooth turn, no abrupt spins.
+const facing=Math.atan2(phoenix.position.x-camera.position.x,phoenix.position.z-camera.position.z);const turn=Math.atan2(Math.sin(facing-phoenix.rotation.y),Math.cos(facing-phoenix.rotation.y));phoenix.rotation.y+=turn*(1-Math.exp(-dt*7));
 crystal.rotation.y+=dt*.65;crystal.position.y=1.5+Math.sin(time*2)*.13;marker.position.y=3.3+Math.sin(time*3)*.19;diamond.rotation.y+=dt;
 const near=distance()<=3;if(near!==nearPrev){nearPrev=near;$("near").textContent=near?t("near"):t(touchDevice?"touchControls":"controls")}
 const range=touchDevice?10.5:8.6;camOffset.set(Math.sin(yaw)*Math.cos(pitch)*range,Math.sin(pitch)*range,Math.cos(yaw)*Math.cos(pitch)*range);look.copy(player.position).add(new T.Vector3(0,1.15,0));// Conservative camera shortening near solid obstacles (not a full physics raycast).
