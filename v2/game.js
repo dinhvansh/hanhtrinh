@@ -147,7 +147,7 @@ if(valley){
   valley.hero.rotation.y=player.rotation.y+Math.PI;
   valley.mascot.position.copy(phoenix.position);
   valley.mascot.position.y+=valley.floor(phoenix.position.x,phoenix.position.z);
-  valley.mascot.rotation.y=phoenix.rotation.y;
+  valley.mascot.rotation.y=phoenix.rotation.y+Math.PI;
   valley.animateCompanion(time);
   valley.pose(!grounded?"Jump_Idle":moving?(running?"Running_A":"Walking_A"):"Unarmed_Idle",dt);
 }

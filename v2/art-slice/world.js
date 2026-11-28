@@ -3,9 +3,9 @@ const {MeshoptDecoder}=await import("./meshopt_decoder.module.js");
 await MeshoptDecoder.ready;
 const loader=new T.GLTFLoader();
 loader.setMeshoptDecoder(MeshoptDecoder);
-const urls=["../storybook/Millstream.glb","models/explorer.glb"];
+const urls=["../storybook/Millstream.glb","../storybook/Travellers.glb"];
 let loaded=0;
-const [landscape,explorerAsset]=await Promise.all(urls.map(async path=>{
+const [landscape,actors]=await Promise.all(urls.map(async path=>{
   const model=await loader.loadAsync(new URL(path,import.meta.url).href);
   onLoad(++loaded,urls.length);
   return model;
@@ -33,54 +33,54 @@ function floor(x,z){
   const k=j*count+i;
   return (1-r)*((1-t)*heights[k]+t*heights[k+1])+r*((1-t)*heights[k+count]+t*heights[k+count+1]);
 }
-const explorer={clone:explorerAsset.scene,wrapper:new T.Group()};
-explorer.clone.traverse(node=>{
-  if(/knife|crossbow|throwable/i.test(node.name))node.visible=false;
-  if(node.isMesh)node.castShadow=true;
-});
-const bounds=new T.Box3().setFromObject(explorer.clone);
-const scale=1.85/(bounds.max.y-bounds.min.y);
-explorer.clone.scale.setScalar(scale);
-explorer.clone.position.y=-bounds.min.y*scale;
-explorer.wrapper.add(explorer.clone);
-explorer.wrapper.position.set(.7,floor(.7,4.2),4.2);
-explorer.wrapper.rotation.y=.18;
-scene.add(explorer.wrapper);
-const mixer=new T.AnimationMixer(explorer.clone);const idle=explorerAsset.animations.find(a=>a.name==="Unarmed_Idle");if(idle)mixer.clipAction(idle).play();
-// A rolled field map tucked behind the shoulder.
-const chest=explorer.clone.getObjectByName("chest");
-const roll=new T.Mesh(new T.CylinderGeometry(.085,.085,.56,16),new T.MeshStandardMaterial({color:0xf6dbac}));
-roll.position.set(0,.04,-.24);roll.rotation.z=1.26;chest.add(roll);
-for(const y of [-.15,.15]){
-  const binding=new T.Mesh(new T.CylinderGeometry(.089,.089,.045,16),new T.MeshStandardMaterial({color:0x896548}));
-  binding.position.y=y;roll.add(binding);
-}
-// Use the identity and palette of the original companion.
-const original=await loader.loadAsync(new URL("../assets/models/phoenix-companion.gltf",import.meta.url).href);const mascot=original.scene;const bb=new T.Box3().setFromObject(mascot),ss=bb.getSize(new T.Vector3());mascot.scale.setScalar(1.35/ss.y);mascot.position.set(2.1,floor(2.1,4)+.7,4);mascot.rotation.y=Math.PI;scene.add(mascot);mascot.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true}});
-// A fine brass orbit and a four-point glint give the companion its own magical motif.
-const orbit=new T.Mesh(new T.TorusGeometry(.205,.012,8,48),new T.MeshStandardMaterial({color:0xffcf85,metalness:.35,roughness:.42}));
-orbit.position.set(0,.37,-.48);orbit.rotation.x=.9;orbit.rotation.y=-.36;mascot.add(orbit);
-const glint=new T.Mesh(new T.OctahedronGeometry(.046),new T.MeshStandardMaterial({color:0xffeac3,emissive:0xf5bb65,emissiveIntensity:.4}));
-glint.scale.set(.72,1.5,.6);glint.position.set(.182,.45,-.5);mascot.add(glint);
-const eyeParts=mascot.children.filter(node=>/plush_(eye|iris|white)/.test(node.name)&&node.position.y>.8);
-const eyeRest=eyeParts.map(node=>({y:node.position.y,scale:node.scale.y}));
-
-function animateCompanion(time){
-
-  mascot.rotation.z=.045*Math.sin(time*1.7);
-  const openness=Math.min(1,.07+Math.abs(time%3.8-2)*11);
-  eyeParts.forEach((node,i)=>{
-    node.scale.y=eyeRest[i].scale*openness;
-    node.position.y=.98+(eyeRest[i].y-.98)*openness;
+const hero=actors.scene.getObjectByName("FernScout");
+const mascot=actors.scene.getObjectByName("LanternPhoenix");
+scene.add(hero,mascot);
+hero.scale.setScalar(.9);
+hero.position.set(.7,floor(.7,4.2),4.2);
+hero.rotation.y=.18;
+mascot.position.set(2.06,floor(2.06,4)+.63,4);
+const head=hero.getObjectByName("ScoutHead");
+const torso=hero.getObjectByName("ScoutTorso");
+const hood=mascot.getObjectByName("PhoenixHood");
+const legs=["BootPivotL","BootPivotR"].map(name=>hero.getObjectByName(name));
+const arms=["SleevePivotL","SleevePivotR"].map(name=>hero.getObjectByName(name));
+const wings=["WingL","WingR"].map(name=>mascot.getObjectByName(name));
+function portrait(root,materialName){
+  let map;
+  root.traverse(node=>{
+    if(!node.isMesh)return;
+    node.castShadow=true;
+    for(const material of [].concat(node.material)){
+      if(material.name===materialName)map=material.map;
+    }
   });
+  return map;
 }
-
-const clips=explorerAsset.animations;
-let action=mixer.clipAction(idle);
+const heroFace=portrait(hero,"Scout portrait atlas");
+const phoenixFace=portrait(mascot,"Phoenix portrait atlas");
+let phase=0,time=0,stride=0;
 function pose(name,dt){
-  const next=mixer.clipAction(T.AnimationClip.findByName(clips,name));
-  if(action!==next){action.fadeOut(.14);next.reset().fadeIn(.14).play();action=next}
-  mixer.update(dt);
+  time+=dt;
+  const running=name==="Running_A",jump=name==="Jump_Idle";
+  const moving=running||name==="Walking_A";
+  stride=T.MathUtils.damp(stride,moving?(running?.80:.52):0,12,dt);
+  phase+=(running?14:9)*dt;
+  const step=Math.sin(phase)*stride;
+  legs[0].rotation.x=jump?-.48:step;
+  legs[1].rotation.x=jump?.30:-step;
+  arms[0].rotation.x=jump?-.72:-step*.74;
+  arms[1].rotation.x=jump?-.65:step*.74;
+  const bob=.012*Math.sin(time*2.4)+.035*stride*Math.abs(Math.cos(phase));
+  torso.position.y=.67+bob;
+  head.position.y=1.12+bob;
+  head.rotation.z=.027*Math.sin(time*1.9);
+  heroFace.offset.x=time%4.3>4.15?.5:0;
 }
-return {hero:explorer.wrapper,mascot,pose,animateCompanion,floor,obstacles};
+function animateCompanion(t){
+  hood.rotation.z=.06*Math.sin(t*1.65);
+  for(let i=0;i<wings.length;i++)wings[i].rotation.z=(i?1:-1)*(.13+.24*Math.sin(t*3.7));
+  phoenixFace.offset.x=t%3.9>3.76?.5:0;
+}
+return {hero,mascot,pose,animateCompanion,floor,obstacles};
 }
