@@ -87,6 +87,7 @@ import("./art-slice/world.js").then(async ({buildValley})=>{
   player.visible=false;phoenix.visible=false;
   stationRoot.position.y=valley.floor(station.x,station.z);
   obstacles.splice(0,obstacles.length,...valley.obstacles);
+  report("environment","millstream");
 }).catch(error=>console.warn("Valley assets unavailable",error));
 let guide=false,yaw=0,pitch=.43,vy=0,grounded=true,step=0,lit=false,quizIndex=0,waiting=false,modal=false,saveFailed=false;const keys=new Set();
 function refresh(){const done=C.stars(state);$("stars").textContent=done;$("objective").textContent=done?t("done"):t("objective");$("hint").textContent=done?t("hintDone"):guide?t("hintGuide"):t("hint");if(saveFailed)$("hint").textContent+=" · "+t("saveError");$("guide").textContent=guide?t("stopGuide"):t("guide")}
