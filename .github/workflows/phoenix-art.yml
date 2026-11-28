@@ -21,6 +21,7 @@ jobs:
           python3 -m http.server 8000 > /tmp/phoenix-art.log 2>&1 &
           for i in $(seq 1 20); do curl -fsS http://127.0.0.1:8000/v2/art-slice/ > /dev/null && break; sleep 1; done
           node v2/art-slice/render.mjs
+          cp v2/storybook/Blender-render.jpg art-review/
       - uses: actions/upload-artifact@v4
         if: always()
         with:

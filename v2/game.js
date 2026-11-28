@@ -9,8 +9,8 @@ const qa=new URLSearchParams(location.search).has("qa"), touchDevice=matchMedia(
 const report=(key,value)=>{if(qa)world.dataset[key]=String(value)};
 world.append(canvas); renderer.setPixelRatio(Math.min(devicePixelRatio||1,lowQuality?1:1.6));renderer.outputColorSpace=T.SRGBColorSpace;renderer.toneMapping=T.ACESFilmicToneMapping;renderer.toneMappingExposure=1.15;
 renderer.shadowMap.enabled=!lowQuality;renderer.shadowMap.type=T.PCFShadowMap;
-const scene=new T.Scene();scene.background=new T.Color(0xbfe4f4);scene.fog=new T.Fog(0xbfe4f4,55,105);
-addPhoenixHorizon(T,scene);
+const scene=new T.Scene();scene.background=new T.Color(0xd4e1df);scene.fog=new T.Fog(0xd4e1df,21,77);
+
 const camera=new T.PerspectiveCamera(54,1,.1,160);
 scene.add(new T.HemisphereLight(0xe1f3ff,0x8c7454,2));
 const sun=new T.DirectionalLight(0xfff0d1,2.7);sun.position.set(-15,25,12);sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);Object.assign(sun.shadow.camera,{left:-25,right:25,top:25,bottom:-25,near:1,far:70});sun.shadow.normalBias=.035;scene.add(sun);
@@ -112,7 +112,7 @@ addEventListener("keydown",e=>{if(isModal()||["INPUT","TEXTAREA","SELECT"].inclu
 addEventListener("keyup",e=>keys.delete(e.key.length===1?e.key.toLowerCase():e.key));addEventListener("blur",clearInput);document.addEventListener("visibilitychange",()=>{if(document.hidden)clearInput()});
 let drag=null;canvas.addEventListener("pointerdown",e=>{drag={id:e.pointerId,x:e.clientX,y:e.clientY};canvas.setPointerCapture(e.pointerId)});canvas.addEventListener("pointermove",e=>{if(!drag||drag.id!==e.pointerId)return;yaw-=(e.clientX-drag.x)*.006;pitch=Math.max(.18,Math.min(.85,pitch+(e.clientY-drag.y)*.004));drag.x=e.clientX;drag.y=e.clientY});for(const event of ["pointerup","pointercancel","lostpointercapture"])canvas.addEventListener(event,e=>{if(drag?.id===e.pointerId)drag=null});
 document.querySelectorAll("[data-key]").forEach(b=>{const k=b.dataset.key;b.addEventListener("pointerdown",e=>{e.preventDefault();b.setPointerCapture(e.pointerId);if(!isModal())keys.add(k)});for(const ev of ["pointerup","pointercancel","lostpointercapture"])b.addEventListener(ev,()=>keys.delete(k))});
-function allowed(x,z){return Math.hypot(x,z)<20.9&&!obstacles.some(o=>Math.hypot(x-o.x,z-o.z)<o.r+.3)}
+function allowed(x,z){return Math.hypot(x,z)<20.9&&(!valley||valley.floor(x,z)>-.30)&&!obstacles.some(o=>Math.hypot(x-o.x,z-o.z)<o.r+.3)}
 function guideTarget(x,z){const dx=station.x-x,dz=station.z-z,d=Math.hypot(dx,dz);if(d<2.2)return [station.x+1.4,station.z+1];const len=Math.min(3,d);const angles=[0,.45,-.45,.9,-.9,1.5,-1.5,2.2,-2.2];const theta=Math.atan2(dz,dx);for(const angle of angles){const a=theta+angle,tx=x+Math.cos(a)*len,tz=z+Math.sin(a)*len;if(allowed(tx,tz)&&[.25,.5,.75].every(f=>allowed(x+(tx-x)*f,z+(tz-z)*f)))return [tx,tz]}return [x,z]}
 const camOffset=new T.Vector3(),look=new T.Vector3(),target=new T.Vector3();function resize(){const w=world.clientWidth,h=world.clientHeight;if(!w||!h)return;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix()}addEventListener("resize",resize);resize();
 let last=performance.now(),time=0,nearPrev=null;
